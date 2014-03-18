@@ -1,0 +1,217 @@
+/**
+ * @author Edouard DUPIN
+ * 
+ * @copyright 2011, Edouard DUPIN, all right reserved
+ * 
+ * @license BSD 3 clauses (see license file)
+ */
+
+
+#include <etk/types.h>
+
+#include <ewolsa/debug.h>
+#include <ewolsa/effects.h>
+#include <ewolsa/decWav.h>
+#include <math.h>
+
+static bool    effectsMute = false;
+static float   effectsVolume = 0;
+static int32_t effectsVolumeApply = 1<<16;
+
+
+//----------------------------------------------------------------------------------------------------------
+//                               Effects ...
+//----------------------------------------------------------------------------------------------------------
+//liste d'effet
+class EffectsLoaded {
+	public :
+		EffectsLoaded(const std::string& _file) {
+			m_file = _file;
+			m_requestedTime = 1;
+			m_data = ewolsa::loadAudioFile(_file, 1, m_nbSamples);
+			if (m_data == NULL) {
+				// write an error ...
+			}
+		}
+		std::string m_file;
+		int32_t m_nbSamples;
+		int32_t m_requestedTime;
+		int16_t* m_data;
+};
+
+class RequestPlay {
+	private:
+		bool m_freeSlot;
+		EffectsLoaded* m_effect; // reference to the effects
+		int32_t m_playTime; // position in sample playing in the audio effects
+	public :
+		RequestPlay(EffectsLoaded * _effect) :
+		  m_freeSlot(false),
+		  m_effect(_effect),
+		  m_playTime(0) {
+			
+		};
+		void reset(EffectsLoaded * _effect) {
+			m_effect=_effect;
+			m_playTime=0;
+			m_freeSlot=false;
+		};
+		bool isFree(void) {
+			return m_freeSlot;
+		};
+		void play(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
+			if (true == m_freeSlot) {
+				return;
+			}
+			if (m_effect->m_data == NULL) {
+				m_freeSlot = true;
+				return;
+			}
+			int32_t processTimeMax = etk_min(_nbSample, m_effect->m_nbSamples - m_playTime);
+			processTimeMax = etk_max(0, processTimeMax);
+			int16_t * pointer = _bufferInterlace;
+			int16_t * newData = &m_effect->m_data[m_playTime];
+			//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
+			for (int32_t iii=0; iii<processTimeMax; iii++) {
+				// TODO : set volume and spacialisation ...
+				for (int32_t jjj=0; jjj<_nbChannels; jjj++) {
+					int32_t tmppp = *pointer + ((((int32_t)*newData)*effectsVolumeApply)>>16);
+					*pointer = etk_avg(-32767, tmppp, 32766);
+					//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
+					pointer++;
+				}
+				newData++;
+			}
+			m_playTime += processTimeMax;
+			// check end of playing ...
+			if (m_effect->m_nbSamples <= m_playTime) {
+				m_freeSlot=true;
+			}
+		}
+};
+
+#include <vector>
+std::vector<EffectsLoaded*> ListEffects;
+std::vector<RequestPlay*> ListEffectsPlaying;
+
+void ewolsa::effects::init(void) {
+	ewolsa::effects::volumeSet(0);
+	ewolsa::effects::muteSet(false);
+}
+
+void ewolsa::effects::unInit(void) {
+	ewolsa::effects::volumeSet(-1000);
+	ewolsa::effects::muteSet(true);
+}
+
+int32_t ewolsa::effects::add(const std::string& _file) {
+	for (size_t iii=0; iii<ListEffects.size(); iii++) {
+		if (ListEffects[iii] == NULL) {
+			continue;
+		}
+		if (ListEffects[iii]->m_file == _file) {
+			ListEffects[iii]->m_requestedTime++;
+			return iii;
+		}
+	}
+	// effect does not exist ... create a new one ...
+	EffectsLoaded * tmpEffect = new EffectsLoaded(_file);
+	if (NULL == tmpEffect) {
+		EWOLSA_ERROR("Error to load the effects : \"" << _file << "\"");
+		return -1;
+	}
+	ListEffects.push_back(tmpEffect);
+	return ListEffects.size()-1;
+}
+
+void ewolsa::effects::rm(int32_t _effectId) {
+	// find element ...
+	if (_effectId <0 || _effectId >= (int64_t)ListEffects.size()) {
+		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not remove it ...");
+		return;
+	}
+	if (ListEffects[_effectId] == NULL) {
+		EWOLSA_ERROR("effect ID : " << _effectId << "  == > has already been removed");
+		return;
+	}
+	// check number of requested
+	if (ListEffects[_effectId]->m_requestedTime  <= 0) {
+		EWOLSA_ERROR("effect ID : " << _effectId << "  == > request more than predicted a removed of an effects");
+		return;
+	}
+	ListEffects[_effectId]->m_requestedTime--;
+	// mark to be removed ... TODO : Really removed it when no other element readed it ...
+	// TODO : ...
+}
+
+
+void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
+	if (_effectId <0 || _effectId >= (int64_t)ListEffects.size()) {
+		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not play it ...");
+		return;
+	}
+	if (ListEffects[_effectId] == NULL) {
+		EWOLSA_ERROR("effect ID : " << _effectId << "  == > has been removed");
+		return;
+	}
+	EWOLSA_VERBOSE("effect play : " << _effectId );
+	// try to find an empty slot :
+	for (size_t iii=0; iii<ListEffectsPlaying.size(); iii++) {
+		if (ListEffectsPlaying[iii]->isFree()) {
+			ListEffectsPlaying[iii]->reset(ListEffects[_effectId]);
+			return;
+		}
+	}
+	RequestPlay* newPlay = new RequestPlay(ListEffects[_effectId]);
+	if (NULL == newPlay) {
+		EWOLSA_CRITICAL("Allocation error of a playing element : " << _effectId);
+		return;
+	}
+	ListEffectsPlaying.push_back(newPlay);
+}
+
+
+float ewolsa::effects::volumeGet(void) {
+	return effectsVolume;
+}
+
+
+static void uptateEffectVolume(void) {
+	if (effectsMute == true) {
+		effectsVolumeApply = 0;
+	} else {
+		// convert in an fixpoint value
+		// V2 = V1*10^(db/20)
+		double coef = pow(10, (effectsVolume/20) );
+		effectsVolumeApply = (int32_t)(coef * (double)(1<<16));
+	}
+}
+
+void ewolsa::effects::volumeSet(float _newVolume) {
+	effectsVolume = _newVolume;
+	effectsVolume = etk_avg(-100, effectsVolume, 20);
+	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << effectsVolume << "dB");
+	uptateEffectVolume();
+}
+
+
+bool ewolsa::effects::muteGet(void) {
+	return effectsMute;
+}
+
+
+void ewolsa::effects::muteSet(bool _newMute) {
+	effectsMute = _newMute;
+	EWOLSA_INFO("Set effects Mute at " << _newMute);
+}
+
+
+
+void ewolsa::effects::getData(int16_t* _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
+	for (size_t iii = 0; iii < ListEffectsPlaying.size(); ++iii) {
+		if (ListEffectsPlaying[iii]!= NULL) {
+			ListEffectsPlaying[iii]->play(_bufferInterlace, _nbSample, _nbChannels);
+		}
+	}
+}
+
