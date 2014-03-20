@@ -218,7 +218,7 @@ int16_t* ewolsa::loadAudioFile(const std::string& _filename, int8_t _nbChan, int
 	//int32_t globalDataSize = myHeader.dataSize;
 	int32_t nbSample = (myHeader.dataSize/((myHeader.waveFormat.bitsPerSample/8)*myHeader.waveFormat.channelCount));
 	int32_t outputSize = _nbChan*nbSample;
-	int16_t * outputData = (int16_t*)malloc(outputSize*sizeof(int16_t));
+	int16_t * outputData = new int16_t[outputSize*sizeof(int16_t)];
 	if (NULL == outputData) {
 		EWOLSA_ERROR("Allocation ERROR try to allocate " << (int32_t)(outputSize*sizeof(int16_t) ) << "bytes");
 		return NULL;
@@ -281,7 +281,7 @@ int16_t* ewolsa::loadAudioFile(const std::string& _filename, int8_t _nbChan, int
 			*tmpOut++ = (int16_t)(((left>>1) + (right>>1))>>16);
 		} else {
 			*tmpOut++ = (int16_t)(left>>16);
-			*tmpOut++ = (int16_t)(left>>16);
+			*tmpOut++ = (int16_t)(right>>16);
 		}
 	}
 	// close the file:

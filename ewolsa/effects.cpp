@@ -13,7 +13,10 @@
 #include <ewolsa/effects.h>
 #include <ewolsa/decWav.h>
 #include <math.h>
+#include <ewolsa/LoadedFile.h>
+#include <mutex>
 
+static std::mutex localMutex;
 static bool    effectsMute = false;
 static float   effectsVolume = 0;
 static int32_t effectsVolumeApply = 1<<16;
@@ -22,36 +25,20 @@ static int32_t effectsVolumeApply = 1<<16;
 //----------------------------------------------------------------------------------------------------------
 //                               Effects ...
 //----------------------------------------------------------------------------------------------------------
-//liste d'effet
-class EffectsLoaded {
-	public :
-		EffectsLoaded(const std::string& _file) {
-			m_file = _file;
-			m_requestedTime = 1;
-			m_data = ewolsa::loadAudioFile(_file, 1, m_nbSamples);
-			if (m_data == NULL) {
-				// write an error ...
-			}
-		}
-		std::string m_file;
-		int32_t m_nbSamples;
-		int32_t m_requestedTime;
-		int16_t* m_data;
-};
 
 class RequestPlay {
 	private:
 		bool m_freeSlot;
-		EffectsLoaded* m_effect; // reference to the effects
+		ewolsa::LoadedFile* m_effect; // reference to the effects
 		int32_t m_playTime; // position in sample playing in the audio effects
 	public :
-		RequestPlay(EffectsLoaded * _effect) :
+		RequestPlay(ewolsa::LoadedFile * _effect) :
 		  m_freeSlot(false),
 		  m_effect(_effect),
 		  m_playTime(0) {
 			
 		};
-		void reset(EffectsLoaded * _effect) {
+		void reset(ewolsa::LoadedFile * _effect) {
 			m_effect=_effect;
 			m_playTime=0;
 			m_freeSlot=false;
@@ -91,7 +78,7 @@ class RequestPlay {
 };
 
 #include <vector>
-std::vector<EffectsLoaded*> ListEffects;
+std::vector<ewolsa::LoadedFile*> ListEffects;
 std::vector<RequestPlay*> ListEffectsPlaying;
 
 void ewolsa::effects::init(void) {
@@ -115,7 +102,7 @@ int32_t ewolsa::effects::add(const std::string& _file) {
 		}
 	}
 	// effect does not exist ... create a new one ...
-	EffectsLoaded * tmpEffect = new EffectsLoaded(_file);
+	ewolsa::LoadedFile * tmpEffect = new ewolsa::LoadedFile(_file);
 	if (NULL == tmpEffect) {
 		EWOLSA_ERROR("Error to load the effects : \"" << _file << "\"");
 		return -1;
@@ -203,6 +190,7 @@ bool ewolsa::effects::muteGet(void) {
 void ewolsa::effects::muteSet(bool _newMute) {
 	effectsMute = _newMute;
 	EWOLSA_INFO("Set effects Mute at " << _newMute);
+	uptateEffectVolume();
 }
 
 

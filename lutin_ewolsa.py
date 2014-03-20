@@ -15,7 +15,8 @@ def create(target):
 		'ewolsa/decWav.cpp',
 		'ewolsa/effects.cpp',
 		'ewolsa/ewolsa.cpp',
-		'ewolsa/music.cpp'
+		'ewolsa/music.cpp',
+		'ewolsa/LoadedFile.cpp'
 		])
 	
 	# name of the dependency
