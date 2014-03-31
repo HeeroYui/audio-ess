@@ -15,7 +15,7 @@
 namespace ewolsa {
 	class LoadedFile {
 		public :
-			LoadedFile(const std::string& _file, int8_t _nbChanRequested=1);
+			LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 			~LoadedFile(void);
 			std::string m_file;
 			int32_t m_nbSamples;

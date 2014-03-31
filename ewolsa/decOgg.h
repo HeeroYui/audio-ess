@@ -6,16 +6,15 @@
  * @license BSD 3 clauses (see license file)
  */
 
-#ifndef __EWOLSA_DEC_WAV_H__
-#define __EWOLSA_DEC_WAV_H__
+#ifndef __EWOLSA_DEC_OGG_H__
+#define __EWOLSA_DEC_OGG_H__
 
 #include <etk/types.h>
 
 namespace ewolsa {
-	namespace wav {
+	namespace ogg {
 		int16_t* loadAudioFile(const std::string& _filename, int8_t _nbChan, int32_t& _nbSampleOut);
 	}
 };
 
 #endif
-

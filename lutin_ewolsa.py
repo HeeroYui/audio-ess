@@ -13,6 +13,7 @@ def create(target):
 	myModule.add_src_file([
 		'ewolsa/debug.cpp',
 		'ewolsa/decWav.cpp',
+		'ewolsa/decOgg.cpp',
 		'ewolsa/effects.cpp',
 		'ewolsa/ewolsa.cpp',
 		'ewolsa/music.cpp',
@@ -20,7 +21,7 @@ def create(target):
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['ewol', 'airtaudio'])
+	myModule.add_module_depend(['ewol', 'airtaudio', 'ogg'])
 	
 	myModule.add_export_path(tools.get_current_path(__file__))
 	

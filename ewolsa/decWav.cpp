@@ -59,7 +59,7 @@ typedef struct {
 #define COMPR_G721   (64)
 #define COMPR_MPEG   (80)
 
-int16_t* ewolsa::loadAudioFile(const std::string& _filename, int8_t _nbChan, int32_t& _nbSampleOut) {
+int16_t* ewolsa::wav::loadAudioFile(const std::string& _filename, int8_t _nbChan, int32_t& _nbSampleOut) {
 	_nbSampleOut = 0;
 	waveHeader myHeader;
 	memset(&myHeader, 0, sizeof(waveHeader));
