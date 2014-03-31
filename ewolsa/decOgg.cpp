@@ -85,7 +85,7 @@ int16_t* ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan
 			EWOLSA_DEBUG("comment : " << *ptr);
 			++ptr;
 		}
-		EWOLSA_DEBUG("Bitstream is " << vi->channels << " channel, " << vi->rate << "Hz");
+		EWOLSA_DEBUG("Bitstream is " << (int32_t)vi->channels << " channel, " << (int32_t)vi->rate << "Hz");
 		EWOLSA_DEBUG("Decoded length: " << _nbSampleOut << " samples");
 		EWOLSA_DEBUG("Encoded by: " << ov_comment(&vf,-1)->vendor);
 		EWOLSA_DEBUG("time: " << ((float)_nbSampleOut/(float)vi->rate)/60.0);
@@ -129,7 +129,7 @@ int16_t* ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan
 					}
 					pos += ret;
 				} else {
-					EWOLSA_ERROR("Can not convert " << vi->channels << " channels in " << _nbChan << " channels");
+					EWOLSA_ERROR("Can not convert " << (int32_t)vi->channels << " channels in " << _nbChan << " channels");
 				}
 			}
 			// fwrite(pcmout,1,ret,stdout);
@@ -138,7 +138,7 @@ int16_t* ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan
 	}
 	/* cleanup */
 	ov_clear(&vf);
-	EWOLSA_CRITICAL("Done.");
+	EWOLSA_DEBUG("Done.");
 	return outputData;
 }
 
