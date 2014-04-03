@@ -22,6 +22,8 @@ def create(target):
 	
 	# name of the dependency
 	myModule.add_module_depend(['ewol', 'airtaudio', 'ogg'])
+	if target.name=="Android":
+		myModule.add_export_flag_CC("-pthread -frtti -fexceptions")
 	
 	myModule.add_export_path(tools.get_current_path(__file__))
 	

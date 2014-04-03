@@ -17,26 +17,28 @@
 ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
   m_file(_fileName),
   m_nbSamples(0),
+  m_nbSamplesTotal(0),
+  m_nbChanRequested(_nbChanRequested),
   m_requestedTime(1),
-  m_data(NULL){
-	std::string tmpName = std::tolower(_fileName);
+  m_data(NULL) {
+	m_stopRequested = false;
+	std::string tmpName = std::tolower(m_file);
 	// select the corect Loader :
 	if (end_with(tmpName, ".wav") == true) {
-		m_data = ewolsa::wav::loadAudioFile(_fileName, _nbChanRequested, m_nbSamples);
+		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
+		m_nbSamplesTotal = m_nbSamples;
 	} else if (end_with(tmpName, ".ogg") == true) {
-		m_data = ewolsa::ogg::loadAudioFile(_fileName, _nbChanRequested, m_nbSamples);
+		pthread_create(&m_thread2, NULL, &ewolsa::ogg::loadFileThreadedMode, this);
 	} else {
-		EWOLSA_ERROR("Extention not managed '" << _fileName << "' Sopported extention : .wav / .ogg");
+		EWOLSA_ERROR("Extention not managed '" << m_file << "' Sopported extention : .wav / .ogg");
 		return;
-	}
-	if (m_data == NULL) {
-		// write an error ...
-		EWOLSA_ERROR("Can not open file : " << _fileName);
 	}
 }
 
 
 ewolsa::LoadedFile::~LoadedFile(void) {
+	m_stopRequested = true;
+	// TODO : wait end of thread...
 	if (m_data != NULL) {
 		delete[] m_data;
 		m_data = NULL;

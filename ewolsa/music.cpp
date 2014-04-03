@@ -80,11 +80,12 @@ void ewolsa::music::preLoad(const std::string& _file) {
 	}
 	ewolsa::LoadedFile* tmp = new ewolsa::LoadedFile(_file, 2);
 	if (tmp != NULL) {
+		/*
 		if (tmp->m_data == NULL) {
 			EWOLSA_ERROR("Music has no data ... : " << _file);
 			delete(tmp);
 			return;
-		}
+		}*/
 		std::unique_lock<std::mutex> lck(localMutex);
 		musicListRead.push_back(tmp);
 	} else {
@@ -185,6 +186,9 @@ void ewolsa::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32
 		musicCurrentRead = -1;
 		musicPositionReading = 0;
 		EWOLSA_ERROR("request read an unexisting audio track ... : " << musicCurrentRead << "/" << musicListRead.size());
+		return;
+	}
+	if (musicListRead[musicCurrentRead]->m_data == NULL) {
 		return;
 	}
 	int32_t processTimeMax = etk_min(_nbSample*_nbChannels, musicListRead[musicCurrentRead]->m_nbSamples - musicPositionReading);
