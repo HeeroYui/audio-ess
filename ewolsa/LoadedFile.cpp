@@ -12,48 +12,34 @@
 #include <ewolsa/LoadedFile.h>
 #include <ewolsa/decWav.h>
 #include <ewolsa/decOgg.h>
+#include <thread>
 
-static void* threadCallback2(void *_ptr) {
-	ewolsa::LoadedFile* decodeFile = (ewolsa::LoadedFile*)_ptr;
-	decodeFile->decode();
-	return NULL;
-}
-
-void ewolsa::LoadedFile::decode(void) {
-	m_data = ewolsa::ogg::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
-}
 
 ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
   m_file(_fileName),
   m_nbSamples(0),
+  m_nbSamplesTotal(0),
   m_nbChanRequested(_nbChanRequested),
   m_requestedTime(1),
-  m_data(NULL){
-	m_thread = NULL;
+  m_data(NULL) {
+	m_stopRequested = false;
 	std::string tmpName = std::tolower(m_file);
 	// select the corect Loader :
 	if (end_with(tmpName, ".wav") == true) {
 		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
-	} else if (end_with(tmpName, ".ogg") == true) {
-		EWOLSA_DEBUG("create thread");
-		pthread_create(&m_thread2, NULL, &threadCallback2, this);
-		EWOLSA_DEBUG("done 1");
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		EWOLSA_DEBUG("done 2");
+		m_nbSamplesTotal = m_nbSamples;
+	} else if (end_with(tmpName, ".ogg") == true) {
+		pthread_create(&m_thread2, NULL, &ewolsa::ogg::loadFileThreadedMode, this);
 	} else {
 		EWOLSA_ERROR("Extention not managed '" << m_file << "' Sopported extention : .wav / .ogg");
 		return;
 	}
-	/*
-	if (m_data == NULL) {
-		// write an error ...
-		EWOLSA_ERROR("Can not open file : " << _fileName);
-	}
-	*/
 }
 
 
 ewolsa::LoadedFile::~LoadedFile(void) {
+	m_stopRequested = true;
 	// TODO : wait end of thread...
 	if (m_data != NULL) {
 		delete[] m_data;

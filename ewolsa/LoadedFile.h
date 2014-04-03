@@ -11,19 +11,20 @@
 #define __EWOLSA_LOADED_FILE_H__
 
 #include <etk/types.h>
-#include <thread>
 #include <pthread.h>
 
 namespace ewolsa {
 	class LoadedFile {
 		private:
-			std::thread* m_thread;
 			pthread_t m_thread2;
+		public:
+			bool m_stopRequested;
 		public:
 			LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 			~LoadedFile(void);
 			std::string m_file;
 			int32_t m_nbSamples;
+			int32_t m_nbSamplesTotal;
 			int32_t m_nbChanRequested;
 			int32_t m_requestedTime;
 			int16_t* m_data;
@@ -31,7 +32,6 @@ namespace ewolsa {
 			const std::string& getName(void) {
 				return m_file;
 			};
-			void decode(void);
 	};
 };
 
