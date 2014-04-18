@@ -41,6 +41,7 @@ static int localSeekFunc(void *datasource, ogg_int64_t offset, int whence) {
 static int localCloseFunc(void *datasource) {
 	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
 	file->fileClose();
+	return 0;
 }
 
 static long localTellFunc(void *datasource) {
