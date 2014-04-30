@@ -6,7 +6,9 @@
  * @license BSD 3 clauses (see license file)
  */
 
-#include <airtaudio/debug.h>
+#include <ewolsa/debug.h>
 
-const char * ewolSaLibName = "ewol-sa  ";
-
+int32_t ewolsa::getLogId(void) {
+	static int32_t g_val = etk::log::registerInstance("ewol-sa");
+	return g_val;
+}

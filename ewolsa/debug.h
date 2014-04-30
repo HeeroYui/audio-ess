@@ -9,20 +9,45 @@
 #ifndef __EWOLSA_DEBUG_H__
 #define __EWOLSA_DEBUG_H__
 
-#include <etk/types.h>
-#include <etk/debugGeneric.h>
+#include <etk/log.h>
 
-extern const char * ewolSaLibName;
+namespace ewolsa {
+	int32_t getLogId(void);
+};
+// TODO : Review this problem of multiple intanciation of "std::stringbuf sb"
+#define EWOLSA_BASE(info,data) \
+	do { \
+		if (info <= etk::log::getLevel(ewolsa::getLogId())) { \
+			std::stringbuf sb; \
+			std::ostream tmpStream(&sb); \
+			tmpStream << data; \
+			etk::log::logStream(ewolsa::getLogId(), info, __LINE__, __class__, __func__, tmpStream); \
+		} \
+	} while(0)
 
-#define EWOLSA_CRITICAL(data)    ETK_CRITICAL(ewolSaLibName, data)
-#define EWOLSA_WARNING(data)     ETK_WARNING(ewolSaLibName, data)
-#define EWOLSA_ERROR(data)       ETK_ERROR(ewolSaLibName, data)
-#define EWOLSA_INFO(data)        ETK_INFO(ewolSaLibName, data)
-#define EWOLSA_DEBUG(data)       ETK_DEBUG(ewolSaLibName, data)
-#define EWOLSA_VERBOSE(data)     ETK_VERBOSE(ewolSaLibName, data)
-#define EWOLSA_ASSERT(cond,data) ETK_ASSERT(ewolSaLibName, cond, data)
-#define EWOLSA_CHECK_INOUT(cond) ETK_CHECK_INOUT(ewolSaLibName, cond)
-#define EWOLSA_TODO(cond)        ETK_TODO(ewolSaLibName, cond)
+#define EWOLSA_CRITICAL(data)      EWOLSA_BASE(1, data)
+#define EWOLSA_ERROR(data)         EWOLSA_BASE(2, data)
+#define EWOLSA_WARNING(data)       EWOLSA_BASE(3, data)
+#ifdef DEBUG
+	#define EWOLSA_INFO(data)          EWOLSA_BASE(4, data)
+	#define EWOLSA_DEBUG(data)         EWOLSA_BASE(5, data)
+	#define EWOLSA_VERBOSE(data)       EWOLSA_BASE(6, data)
+	#define EWOLSA_TODO(data)          EWOLSA_BASE(4, "TODO : " << data)
+#else
+	#define EWOLSA_INFO(data)          do { } while(false)
+	#define EWOLSA_DEBUG(data)         do { } while(false)
+	#define EWOLSA_VERBOSE(data)       do { } while(false)
+	#define EWOLSA_TODO(data)          do { } while(false)
+#endif
+
+#define EWOLSA_ASSERT(cond,data) \
+	do { \
+		if (!(cond)) { \
+			EWOLSA_CRITICAL(data); \
+			assert(!#cond); \
+		} \
+	} while (0)
+
 
 #endif
 
