@@ -38,7 +38,7 @@ static int airtAudioCallBack(void *_outputBuffer,
 
 
 
-void ewolsa::init(void) {
+void ewolsa::init() {
 	if (g_dac != NULL) {
 		EWOLSA_ERROR("multiple init requested ... at the audio system ...");
 		return;
@@ -66,7 +66,7 @@ void ewolsa::init(void) {
 }
 
 
-void ewolsa::unInit(void) {
+void ewolsa::unInit() {
 	if (g_dac == NULL) {
 		EWOLSA_ERROR("multiple un-init requested ... at the audio system ...");
 		return;

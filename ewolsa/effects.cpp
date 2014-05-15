@@ -43,7 +43,7 @@ class RequestPlay {
 			m_playTime=0;
 			m_freeSlot=false;
 		};
-		bool isFree(void) {
+		bool isFree() {
 			return m_freeSlot;
 		};
 		void play(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
@@ -81,12 +81,12 @@ class RequestPlay {
 std::vector<ewolsa::LoadedFile*> ListEffects;
 std::vector<RequestPlay*> ListEffectsPlaying;
 
-void ewolsa::effects::init(void) {
+void ewolsa::effects::init() {
 	ewolsa::effects::volumeSet(0);
 	ewolsa::effects::muteSet(false);
 }
 
-void ewolsa::effects::unInit(void) {
+void ewolsa::effects::unInit() {
 	ewolsa::effects::volumeSet(-1000);
 	ewolsa::effects::muteSet(true);
 }
@@ -158,12 +158,12 @@ void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
 }
 
 
-float ewolsa::effects::volumeGet(void) {
+float ewolsa::effects::volumeGet() {
 	return effectsVolume;
 }
 
 
-static void uptateEffectVolume(void) {
+static void uptateEffectVolume() {
 	if (effectsMute == true) {
 		effectsVolumeApply = 0;
 	} else {
@@ -182,7 +182,7 @@ void ewolsa::effects::volumeSet(float _newVolume) {
 }
 
 
-bool ewolsa::effects::muteGet(void) {
+bool ewolsa::effects::muteGet() {
 	return effectsMute;
 }
 

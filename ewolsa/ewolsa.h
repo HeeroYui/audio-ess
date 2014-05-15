@@ -15,8 +15,8 @@
 #include <ewolsa/music.h>
 
 namespace ewolsa {
-	void init(void);
-	void unInit(void);
+	void init();
+	void unInit();
 };
 
 #endif

@@ -14,18 +14,18 @@
 
 namespace ewolsa {
 	namespace music {
-		void init(void);
-		void unInit(void);
+		void init();
+		void unInit();
 		void fading(int32_t _timeMs);
 		
 		void preLoad(const std::string& _file);
 		bool play(const std::string& _file);
-		bool stop(void);
+		bool stop();
 		
 		// in db
-		float volumeGet(void);
+		float volumeGet();
 		void volumeSet(float _newVolume);
-		bool muteGet(void);
+		bool muteGet();
 		void muteSet(bool _newMute);
 		void getData(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels);
 		

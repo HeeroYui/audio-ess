@@ -21,17 +21,17 @@ namespace ewolsa {
 			pthread_t m_thread2;
 		public:
 			LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
-			~LoadedFile(void);
+			~LoadedFile();
 			std::string m_file;
 			int32_t m_nbSamples;
 			int32_t m_nbChanRequested;
 			int32_t m_requestedTime;
 			int16_t* m_data;
 		public:
-			const std::string& getName(void) {
+			const std::string& getName() {
 				return m_file;
 			};
-			void decode(void);
+			void decode();
 	};
 };
 

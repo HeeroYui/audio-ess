@@ -26,7 +26,7 @@ static std::vector<ewolsa::LoadedFile*> musicListRead;
 static int32_t musicCurrentRead = -1;
 static int32_t musicNextRead = -1;
 
-void ewolsa::music::init(void) {
+void ewolsa::music::init() {
 	ewolsa::music::volumeSet(0);
 	ewolsa::music::muteSet(false);
 	std::unique_lock<std::mutex> lck(localMutex);
@@ -43,7 +43,7 @@ void ewolsa::music::init(void) {
 	musicListRead.clear();
 }
 
-void ewolsa::music::unInit(void) {
+void ewolsa::music::unInit() {
 	ewolsa::music::volumeSet(-1000);
 	ewolsa::music::muteSet(true);
 	std::unique_lock<std::mutex> lck(localMutex);
@@ -119,7 +119,7 @@ bool ewolsa::music::play(const std::string& _file) {
 }
 
 
-bool ewolsa::music::stop(void) {
+bool ewolsa::music::stop() {
 	if (musicCurrentRead == -1) {
 		EWOLSA_INFO("No current audio is playing");
 		return false;
@@ -131,12 +131,12 @@ bool ewolsa::music::stop(void) {
 
 
 
-float ewolsa::music::volumeGet(void) {
+float ewolsa::music::volumeGet() {
 	return musicVolume;
 }
 
 
-static void uptateMusicVolume(void) {
+static void uptateMusicVolume() {
 	if (musicMute == true) {
 		musicVolumeApply = 0;
 	} else {
@@ -156,7 +156,7 @@ void ewolsa::music::volumeSet(float _newVolume) {
 }
 
 
-bool ewolsa::music::muteGet(void) {
+bool ewolsa::music::muteGet() {
 	return musicMute;
 }
 

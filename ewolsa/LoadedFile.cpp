@@ -19,7 +19,7 @@ static void* threadCallback2(void *_ptr) {
 	return NULL;
 }
 
-void ewolsa::LoadedFile::decode(void) {
+void ewolsa::LoadedFile::decode() {
 	m_data = ewolsa::ogg::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
 }
 
@@ -53,7 +53,7 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 }
 
 
-ewolsa::LoadedFile::~LoadedFile(void) {
+ewolsa::LoadedFile::~LoadedFile() {
 	// TODO : wait end of thread...
 	if (m_data != NULL) {
 		delete[] m_data;
