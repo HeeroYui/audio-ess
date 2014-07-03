@@ -63,7 +63,7 @@ void ewolsa::music::unInit() {
 
 void ewolsa::music::fading(int32_t _timeMs) {
 	musicFadingTime = _timeMs;
-	musicFadingTime = etk_avg(-100, musicFadingTime, 20);
+	musicFadingTime = std::avg(-100, musicFadingTime, 20);
 	EWOLSA_INFO("Set music fading time at " << _timeMs << "ms  == > " << musicFadingTime << "ms");
 }
 
@@ -150,7 +150,7 @@ static void uptateMusicVolume() {
 
 void ewolsa::music::volumeSet(float _newVolume) {
 	musicVolume = _newVolume;
-	musicVolume = etk_avg(-1000, musicVolume, 40);
+	musicVolume = std::avg(-1000, musicVolume, 40);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << musicVolume << "dB");
 	uptateMusicVolume();
 }
@@ -191,14 +191,14 @@ void ewolsa::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32
 	if (musicListRead[musicCurrentRead]->m_data == NULL) {
 		return;
 	}
-	int32_t processTimeMax = etk_min(_nbSample*_nbChannels, musicListRead[musicCurrentRead]->m_nbSamples - musicPositionReading);
-	processTimeMax = etk_max(0, processTimeMax);
+	int32_t processTimeMax = std::min(_nbSample*_nbChannels, musicListRead[musicCurrentRead]->m_nbSamples - musicPositionReading);
+	processTimeMax = std::max(0, processTimeMax);
 	int16_t * pointer = _bufferInterlace;
 	int16_t * newData = &musicListRead[musicCurrentRead]->m_data[musicPositionReading];
 	//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
 		int32_t tmppp = *pointer + ((((int32_t)*newData)*musicVolumeApply)>>16);
-		*pointer = etk_avg(-32767, tmppp, 32766);
+		*pointer = std::avg(-32767, tmppp, 32766);
 		//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
 		pointer++;
 		newData++;

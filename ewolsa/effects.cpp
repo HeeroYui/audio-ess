@@ -54,8 +54,8 @@ class RequestPlay {
 				m_freeSlot = true;
 				return;
 			}
-			int32_t processTimeMax = etk_min(_nbSample, m_effect->m_nbSamples - m_playTime);
-			processTimeMax = etk_max(0, processTimeMax);
+			int32_t processTimeMax = std::min(_nbSample, m_effect->m_nbSamples - m_playTime);
+			processTimeMax = std::max(0, processTimeMax);
 			int16_t * pointer = _bufferInterlace;
 			int16_t * newData = &m_effect->m_data[m_playTime];
 			//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
@@ -63,7 +63,7 @@ class RequestPlay {
 				// TODO : set volume and spacialisation ...
 				for (int32_t jjj=0; jjj<_nbChannels; jjj++) {
 					int32_t tmppp = *pointer + ((((int32_t)*newData)*effectsVolumeApply)>>16);
-					*pointer = etk_avg(-32767, tmppp, 32766);
+					*pointer = std::avg(-32767, tmppp, 32766);
 					//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
 					pointer++;
 				}
@@ -176,7 +176,7 @@ static void uptateEffectVolume() {
 
 void ewolsa::effects::volumeSet(float _newVolume) {
 	effectsVolume = _newVolume;
-	effectsVolume = etk_avg(-100, effectsVolume, 20);
+	effectsVolume = std::avg(-100, effectsVolume, 20);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << effectsVolume << "dB");
 	uptateEffectVolume();
 }
