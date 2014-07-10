@@ -150,7 +150,7 @@ static void uptateMusicVolume() {
 
 void ewolsa::music::volumeSet(float _newVolume) {
 	musicVolume = _newVolume;
-	musicVolume = std::avg(-1000, musicVolume, 40);
+	musicVolume = std::avg(-1000.0f, musicVolume, 40.0f);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << musicVolume << "dB");
 	uptateMusicVolume();
 }

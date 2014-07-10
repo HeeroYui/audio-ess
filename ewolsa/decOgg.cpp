@@ -12,6 +12,7 @@
 #include <ewolsa/decOgg.h>
 #include <tremor/ivorbiscodec.h>
 #include <tremor/ivorbisfile.h>
+#include <memory>
 
 
 static size_t LocalReadFunc(void *ptr, size_t size, size_t nmemb, void *datasource) {
@@ -39,6 +40,7 @@ static int localSeekFunc(void *datasource, ogg_int64_t offset, int whence) {
 static int localCloseFunc(void *datasource) {
 	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
 	file->fileClose();
+	return 0;
 }
 
 static long localTellFunc(void *datasource) {
@@ -57,23 +59,23 @@ int16_t* ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan
 		localCloseFunc,
 		localTellFunc
 	};
-	etk::FSNode fileAccess(_filename);
+	std::unique_ptr<etk::FSNode> fileAccess = std::unique_ptr<etk::FSNode>(new etk::FSNode(_filename));
 	// Start loading the XML : 
 	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
-	if (false == fileAccess.exist()) {
+	if (false == fileAccess->exist()) {
 		//EWOLSA_ERROR("File Does not exist : \"" << fileAccess << "\"");
 		return NULL;
 	}
-	int32_t fileSize = fileAccess.fileSize();
+	int32_t fileSize = fileAccess->fileSize();
 	if (0 == fileSize) {
 		//EWOLSA_ERROR("This file is empty : \"" << fileAccess << "\"");
 		return NULL;
 	}
-	if (false == fileAccess.fileOpenRead()) {
+	if (false == fileAccess->fileOpenRead()) {
 		//EWOLSA_ERROR("Can not open the file : \"" << fileAccess << "\"");
 		return NULL;
 	}
-	if (ov_open_callbacks(&fileAccess, &vf, NULL, 0, tmpCallback) < 0) {
+	if (ov_open_callbacks(&(*fileAccess), &vf, NULL, 0, tmpCallback) < 0) {
 		//EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
 		return NULL;
 	}
@@ -138,7 +140,7 @@ int16_t* ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan
 			//EWOLSA_DEBUG("get data : " << ret << " Bytes");
 		}
 	}
-	/* cleanup */
+	// cleanup
 	ov_clear(&vf);
 	//EWOLSA_DEBUG("Done.");
 	return outputData;

@@ -176,7 +176,7 @@ static void uptateEffectVolume() {
 
 void ewolsa::effects::volumeSet(float _newVolume) {
 	effectsVolume = _newVolume;
-	effectsVolume = std::avg(-100, effectsVolume, 20);
+	effectsVolume = std::avg(-100.0f, effectsVolume, 20.0f);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << effectsVolume << "dB");
 	uptateEffectVolume();
 }
