@@ -30,7 +30,7 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
   m_requestedTime(1),
   m_data(NULL){
 	m_thread = NULL;
-	std::string tmpName = std::tolower(m_file);
+	std::string tmpName = etk::tolower(m_file);
 	// select the corect Loader :
 	if (end_with(tmpName, ".wav") == true) {
 		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
