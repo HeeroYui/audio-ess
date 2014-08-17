@@ -32,9 +32,9 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 	m_thread = NULL;
 	std::string tmpName = etk::tolower(m_file);
 	// select the corect Loader :
-	if (end_with(tmpName, ".wav") == true) {
+	if (etk::end_with(tmpName, ".wav") == true) {
 		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
-	} else if (end_with(tmpName, ".ogg") == true) {
+	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		EWOLSA_DEBUG("create thread");
 		pthread_create(&m_thread2, NULL, &threadCallback2, this);
 		EWOLSA_DEBUG("done 1");
