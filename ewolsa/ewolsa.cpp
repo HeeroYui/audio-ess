@@ -9,78 +9,66 @@
 
 #include <etk/types.h>
 
-#include <airtaudio/Interface.h>
+#include <river/Interface.h>
+#include <river/Manager.h>
 #include <ewolsa/ewolsa.h>
 #include <ewolsa/debug.h>
 
 
-
-airtaudio::Interface* g_dac;
-
-static int airtAudioCallBack(void *_outputBuffer,
-                             void *_inputBuffer,
-                             unsigned int _nBufferFrames,
-                             double _streamTime,
-                             airtaudio::streamStatus _status,
-                             void* _userData) {
-	if (_outputBuffer == NULL) {
-		EWOLSA_ERROR("Null output buffer pointer");
-		return -1;
-	}
-	// Reset output data, in case ...
-	memset(_outputBuffer, 0, _nBufferFrames*2*sizeof(int16_t));
-	// call music
-	ewolsa::music::getData((int16_t*)_outputBuffer, _nBufferFrames, 2);
-	// call Effects
-	ewolsa::effects::getData((int16_t*)_outputBuffer, _nBufferFrames, 2);
-	return 0;
-}
-
-
+class OutputInterface {
+	private:
+		std::shared_ptr<river::Manager> m_manager;
+		std::shared_ptr<river::Interface> m_interface;
+	public:
+		OutputInterface() {
+			m_manager = river::Manager::create("testApplication");
+			//Set stereo output:
+			std::vector<audio::channel> channelMap;
+			channelMap.push_back(audio::channel_frontLeft);
+			channelMap.push_back(audio::channel_frontRight);
+			m_interface = m_manager->createOutput(48000,
+			                                      channelMap,
+			                                      audio::format_int16,
+			                                      "speaker",
+			                                      "ewolsa::basicOutput");
+			// set callback mode ...
+			m_interface->setOutputCallback(1024,
+			                               std::bind(&OutputInterface::onDataNeeded,
+			                                         this,
+			                                         std::placeholders::_1,
+			                                         std::placeholders::_2,
+			                                         std::placeholders::_3,
+			                                         std::placeholders::_4,
+			                                         std::placeholders::_5));
+			m_interface->start();
+		}
+		~OutputInterface() {
+			m_interface->stop();
+			m_interface.reset();
+			m_manager.reset();
+		}
+		void onDataNeeded(const std::chrono::system_clock::time_point& _playTime,
+		                  const size_t& _nbChunk,
+		                  const std::vector<audio::channel>& _map,
+		                  void* _data,
+		                  enum audio::format _type) {
+			if (_type != audio::format_int16) {
+				EWOLSA_ERROR("call wrong type ... (need int16_t)");
+			}
+			// call music
+			ewolsa::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+			// call Effects
+			ewolsa::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+		}
+};
+std::shared_ptr<OutputInterface> g_ioInterface;
 
 void ewolsa::init() {
-	if (g_dac != NULL) {
-		EWOLSA_ERROR("multiple init requested ... at the audio system ...");
-		return;
-	}
-	ewolsa::effects::init();
-	ewolsa::music::init();
-	g_dac = new airtaudio::Interface();
-	if (g_dac == NULL) {
-		EWOLSA_ERROR("Can not create AirTAudio interface");
-		return;
-	}
-	g_dac->instanciate();
-	if ( g_dac->getDeviceCount() < 1 ) {
-		EWOLSA_ERROR("No audio devices found!");
-		return;
-	}
-	airtaudio::StreamParameters parameters;
-	parameters.deviceId = g_dac->getDefaultOutputDevice();
-	parameters.nChannels = 2;
-	parameters.firstChannel = 0;
-	unsigned int bufferFrames = 256;
-	EWOLSA_DEBUG("init Stream ...");
-	g_dac->openStream(&parameters, NULL, airtaudio::SINT16, 48000, &bufferFrames, &airtAudioCallBack, NULL);
-	g_dac->startStream();
+	g_ioInterface = std::make_shared<OutputInterface>();
 }
 
-
 void ewolsa::unInit() {
-	if (g_dac == NULL) {
-		EWOLSA_ERROR("multiple un-init requested ... at the audio system ...");
-		return;
-	}
-	ewolsa::effects::init();
-	ewolsa::music::init();
-	
-	// Stop the stream
-	g_dac->stopStream();
-	if ( g_dac->isStreamOpen() ) {
-		g_dac->closeStream();
-	}
-	delete(g_dac);
-	g_dac = NULL;
+	g_ioInterface.reset();
 }
 
 
