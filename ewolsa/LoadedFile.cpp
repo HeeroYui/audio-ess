@@ -13,30 +13,31 @@
 #include <ewolsa/decWav.h>
 #include <ewolsa/decOgg.h>
 
-static void* threadCallback2(void *_ptr) {
-	ewolsa::LoadedFile* decodeFile = (ewolsa::LoadedFile*)_ptr;
+static void threadCallback2(void* _userData) {
+	etk::log::setThreadName("ewolSA decoder");
+	ewolsa::LoadedFile* decodeFile = reinterpret_cast<ewolsa::LoadedFile*>(_userData);
 	decodeFile->decode();
-	return NULL;
 }
 
 void ewolsa::LoadedFile::decode() {
-	m_data = ewolsa::ogg::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
+	m_data = ewolsa::ogg::loadAudioFile(m_file, m_nbChanRequested);
+	m_nbSamples = m_data.size();
 }
 
 ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
+  m_thread(nullptr),
   m_file(_fileName),
   m_nbSamples(0),
   m_nbChanRequested(_nbChanRequested),
-  m_requestedTime(1),
-  m_data(NULL){
-	m_thread = NULL;
+  m_requestedTime(1){
 	std::string tmpName = etk::tolower(m_file);
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
-		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested, m_nbSamples);
+		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested);
+		m_nbSamples = m_data.size();
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		EWOLSA_DEBUG("create thread");
-		pthread_create(&m_thread2, NULL, &threadCallback2, this);
+		m_thread = new std::thread(&threadCallback2, this);
 		EWOLSA_DEBUG("done 1");
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		EWOLSA_DEBUG("done 2");
@@ -45,7 +46,7 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 		return;
 	}
 	/*
-	if (m_data == NULL) {
+	if (m_data == nullptr) {
 		// write an error ...
 		EWOLSA_ERROR("Can not open file : " << _fileName);
 	}
@@ -54,10 +55,8 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 
 
 ewolsa::LoadedFile::~LoadedFile() {
-	// TODO : wait end of thread...
-	if (m_data != NULL) {
-		delete[] m_data;
-		m_data = NULL;
+	if (m_thread != nullptr) {
+		delete m_thread;
 	}
 }
 

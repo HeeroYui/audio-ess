@@ -31,6 +31,10 @@ class OutputInterface {
 			                                      audio::format_int16,
 			                                      "speaker",
 			                                      "ewolsa::basicOutput");
+			if (m_interface == nullptr) {
+				EWOLSA_ERROR("can not allocate output interface ... ");
+				return;
+			}
 			// set callback mode ...
 			m_interface->setOutputCallback(1024,
 			                               std::bind(&OutputInterface::onDataNeeded,
@@ -43,6 +47,9 @@ class OutputInterface {
 			m_interface->start();
 		}
 		~OutputInterface() {
+			if (m_interface == nullptr) {
+				return;
+			}
 			m_interface->stop();
 			m_interface.reset();
 			m_manager.reset();
@@ -58,7 +65,7 @@ class OutputInterface {
 			// call music
 			ewolsa::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 			// call Effects
-			ewolsa::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+			//ewolsa::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 		}
 };
 std::shared_ptr<OutputInterface> g_ioInterface;

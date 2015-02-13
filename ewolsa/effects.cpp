@@ -50,7 +50,7 @@ class RequestPlay {
 			if (true == m_freeSlot) {
 				return;
 			}
-			if (m_effect->m_data == NULL) {
+			if (m_effect->m_data.size() == 0) {
 				m_freeSlot = true;
 				return;
 			}
@@ -93,7 +93,7 @@ void ewolsa::effects::unInit() {
 
 int32_t ewolsa::effects::add(const std::string& _file) {
 	for (size_t iii=0; iii<ListEffects.size(); iii++) {
-		if (ListEffects[iii] == NULL) {
+		if (ListEffects[iii] == nullptr) {
 			continue;
 		}
 		if (ListEffects[iii]->m_file == _file) {
@@ -103,7 +103,7 @@ int32_t ewolsa::effects::add(const std::string& _file) {
 	}
 	// effect does not exist ... create a new one ...
 	ewolsa::LoadedFile * tmpEffect = new ewolsa::LoadedFile(_file);
-	if (NULL == tmpEffect) {
+	if (nullptr == tmpEffect) {
 		EWOLSA_ERROR("Error to load the effects : \"" << _file << "\"");
 		return -1;
 	}
@@ -117,7 +117,7 @@ void ewolsa::effects::rm(int32_t _effectId) {
 		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not remove it ...");
 		return;
 	}
-	if (ListEffects[_effectId] == NULL) {
+	if (ListEffects[_effectId] == nullptr) {
 		EWOLSA_ERROR("effect ID : " << _effectId << "  == > has already been removed");
 		return;
 	}
@@ -137,7 +137,7 @@ void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
 		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not play it ...");
 		return;
 	}
-	if (ListEffects[_effectId] == NULL) {
+	if (ListEffects[_effectId] == nullptr) {
 		EWOLSA_ERROR("effect ID : " << _effectId << "  == > has been removed");
 		return;
 	}
@@ -150,7 +150,7 @@ void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
 		}
 	}
 	RequestPlay* newPlay = new RequestPlay(ListEffects[_effectId]);
-	if (NULL == newPlay) {
+	if (nullptr == newPlay) {
 		EWOLSA_CRITICAL("Allocation error of a playing element : " << _effectId);
 		return;
 	}
@@ -197,7 +197,7 @@ void ewolsa::effects::muteSet(bool _newMute) {
 
 void ewolsa::effects::getData(int16_t* _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
 	for (size_t iii = 0; iii < ListEffectsPlaying.size(); ++iii) {
-		if (ListEffectsPlaying[iii]!= NULL) {
+		if (ListEffectsPlaying[iii]!= nullptr) {
 			ListEffectsPlaying[iii]->play(_bufferInterlace, _nbSample, _nbChannels);
 		}
 	}

@@ -18,7 +18,6 @@ namespace ewolsa {
 	class LoadedFile {
 		private:
 			std::thread* m_thread;
-			pthread_t m_thread2;
 		public:
 			LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 			~LoadedFile();
@@ -26,7 +25,7 @@ namespace ewolsa {
 			int32_t m_nbSamples;
 			int32_t m_nbChanRequested;
 			int32_t m_requestedTime;
-			int16_t* m_data;
+			std::vector<int16_t> m_data;
 		public:
 			const std::string& getName() {
 				return m_file;

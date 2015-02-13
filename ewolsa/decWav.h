@@ -13,7 +13,7 @@
 
 namespace ewolsa {
 	namespace wav {
-		int16_t* loadAudioFile(const std::string& _filename, int8_t _nbChan, int32_t& _nbSampleOut);
+		std::vector<int16_t> loadAudioFile(const std::string& _filename, int8_t _nbChan);
 	}
 };
 

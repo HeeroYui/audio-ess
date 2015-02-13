@@ -34,11 +34,11 @@ void ewolsa::music::init() {
 	musicNextRead = -1;
 	musicPositionReading = 0;
 	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == NULL) {
+		if (musicListRead[iii] == nullptr) {
 			continue;
 		}
 		delete musicListRead[iii];
-		musicListRead[iii] = NULL;
+		musicListRead[iii] = nullptr;
 	}
 	musicListRead.clear();
 }
@@ -51,11 +51,11 @@ void ewolsa::music::unInit() {
 	musicNextRead = -1;
 	musicPositionReading = 0;
 	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == NULL) {
+		if (musicListRead[iii] == nullptr) {
 			continue;
 		}
 		delete musicListRead[iii];
-		musicListRead[iii] = NULL;
+		musicListRead[iii] = nullptr;
 	}
 	musicListRead.clear();
 }
@@ -71,7 +71,7 @@ void ewolsa::music::fading(int32_t _timeMs) {
 void ewolsa::music::preLoad(const std::string& _file) {
 	// check if music already existed ...
 	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == NULL) {
+		if (musicListRead[iii] == nullptr) {
 			continue;
 		}
 		if (musicListRead[iii]->getName() == _file) {
@@ -79,9 +79,9 @@ void ewolsa::music::preLoad(const std::string& _file) {
 		}
 	}
 	ewolsa::LoadedFile* tmp = new ewolsa::LoadedFile(_file, 2);
-	if (tmp != NULL) {
+	if (tmp != nullptr) {
 		/*
-		if (tmp->m_data == NULL) {
+		if (tmp->m_data == nullptr) {
 			EWOLSA_ERROR("Music has no data ... : " << _file);
 			delete(tmp);
 			return;
@@ -101,7 +101,7 @@ bool ewolsa::music::play(const std::string& _file) {
 	int32_t idMusic = -1;
 	// check if music already existed ...
 	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == NULL) {
+		if (musicListRead[iii] == nullptr) {
 			continue;
 		}
 		if (musicListRead[iii]->getName() == _file) {
@@ -182,23 +182,26 @@ void ewolsa::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32
 		return;
 	}
 	if (   musicCurrentRead >= musicListRead.size()
-	    || musicListRead[musicCurrentRead] == NULL) {
+	    || musicListRead[musicCurrentRead] == nullptr) {
 		musicCurrentRead = -1;
 		musicPositionReading = 0;
 		EWOLSA_ERROR("request read an unexisting audio track ... : " << musicCurrentRead << "/" << musicListRead.size());
 		return;
 	}
-	if (musicListRead[musicCurrentRead]->m_data == NULL) {
+	if (musicListRead[musicCurrentRead]->m_data.size() == 0) {
 		return;
 	}
 	int32_t processTimeMax = std::min(_nbSample*_nbChannels, musicListRead[musicCurrentRead]->m_nbSamples - musicPositionReading);
 	processTimeMax = std::max(0, processTimeMax);
 	int16_t * pointer = _bufferInterlace;
 	int16_t * newData = &musicListRead[musicCurrentRead]->m_data[musicPositionReading];
-	//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
+	EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " nbCannels=" << _nbChannels << " chunkRequest=" << _nbSample);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
-		int32_t tmppp = *pointer + ((((int32_t)*newData)*musicVolumeApply)>>16);
+		/*
+		int32_t tmppp = ((int32_t)*pointer) + ((((int32_t)*newData)*musicVolumeApply)>>16);
 		*pointer = std::avg(-32767, tmppp, 32766);
+		*/
+		*pointer = *newData;
 		//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
 		pointer++;
 		newData++;
