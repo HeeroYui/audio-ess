@@ -36,14 +36,14 @@ class OutputInterface {
 				return;
 			}
 			// set callback mode ...
-			m_interface->setOutputCallback(1024,
-			                               std::bind(&OutputInterface::onDataNeeded,
+			m_interface->setOutputCallback(std::bind(&OutputInterface::onDataNeeded,
 			                                         this,
 			                                         std::placeholders::_1,
 			                                         std::placeholders::_2,
 			                                         std::placeholders::_3,
 			                                         std::placeholders::_4,
-			                                         std::placeholders::_5));
+			                                         std::placeholders::_5,
+			                                         std::placeholders::_6));
 			m_interface->start();
 		}
 		~OutputInterface() {
@@ -54,12 +54,13 @@ class OutputInterface {
 			m_interface.reset();
 			m_manager.reset();
 		}
-		void onDataNeeded(const std::chrono::system_clock::time_point& _playTime,
+		void onDataNeeded(void* _data,
+		                  const std::chrono::system_clock::time_point& _playTime,
 		                  const size_t& _nbChunk,
-		                  const std::vector<audio::channel>& _map,
-		                  void* _data,
-		                  enum audio::format _type) {
-			if (_type != audio::format_int16) {
+		                  enum audio::format _format,
+		                  uint32_t _frequency,
+		                  const std::vector<audio::channel>& _map) {
+			if (_format != audio::format_int16) {
 				EWOLSA_ERROR("call wrong type ... (need int16_t)");
 			}
 			// call music

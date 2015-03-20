@@ -8,13 +8,14 @@
 
 
 #include <etk/types.h>
+#include <etk/thread/tools.h>
 #include <ewolsa/debug.h>
 #include <ewolsa/LoadedFile.h>
 #include <ewolsa/decWav.h>
 #include <ewolsa/decOgg.h>
 
 static void threadCallback2(void* _userData) {
-	etk::log::setThreadName("ewolSA decoder");
+	etk::thread::setName("ewolSA decoder");
 	ewolsa::LoadedFile* decodeFile = reinterpret_cast<ewolsa::LoadedFile*>(_userData);
 	decodeFile->decode();
 }
