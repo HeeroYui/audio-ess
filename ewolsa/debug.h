@@ -14,16 +14,7 @@
 namespace ewolsa {
 	int32_t getLogId();
 };
-// TODO : Review this problem of multiple intanciation of "std::stringbuf sb"
-#define EWOLSA_BASE(info,data) \
-	do { \
-		if (info <= etk::log::getLevel(ewolsa::getLogId())) { \
-			std::stringbuf sb; \
-			std::ostream tmpStream(&sb); \
-			tmpStream << data; \
-			etk::log::logStream(ewolsa::getLogId(), info, __LINE__, __class__, __func__, tmpStream); \
-		} \
-	} while(0)
+#define EWOLSA_BASE(info,data) TK_LOG_BASE(ewolsa::getLogId(),info,data)
 
 #define EWOLSA_CRITICAL(data)      EWOLSA_BASE(1, data)
 #define EWOLSA_ERROR(data)         EWOLSA_BASE(2, data)
