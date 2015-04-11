@@ -6,9 +6,9 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <ewolsa/debug.h>
+#include <audio/ess/debug.h>
 
-int32_t ewolsa::getLogId() {
-	static int32_t g_val = etk::log::registerInstance("ewol-sa");
+int32_t audio::ess::getLogId() {
+	static int32_t g_val = etk::log::registerInstance("audio-ess");
 	return g_val;
 }

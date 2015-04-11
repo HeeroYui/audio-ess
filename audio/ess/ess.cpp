@@ -9,19 +9,19 @@
 
 #include <etk/types.h>
 
-#include <river/Interface.h>
-#include <river/Manager.h>
-#include <ewolsa/ewolsa.h>
-#include <ewolsa/debug.h>
+#include <audio/river/Interface.h>
+#include <audio/river/Manager.h>
+#include <audio/ess/ess.h>
+#include <audio/ess/debug.h>
 
 
 class OutputInterface {
 	private:
-		std::shared_ptr<river::Manager> m_manager;
-		std::shared_ptr<river::Interface> m_interface;
+		std::shared_ptr<audio::river::Manager> m_manager;
+		std::shared_ptr<audio::river::Interface> m_interface;
 	public:
 		OutputInterface() {
-			m_manager = river::Manager::create("testApplication");
+			m_manager = audio::river::Manager::create("testApplication");
 			//Set stereo output:
 			std::vector<audio::channel> channelMap;
 			channelMap.push_back(audio::channel_frontLeft);
@@ -30,7 +30,7 @@ class OutputInterface {
 			                                      channelMap,
 			                                      audio::format_int16,
 			                                      "speaker",
-			                                      "ewolsa::basicOutput");
+			                                      "audio::ess::basicOutput");
 			if (m_interface == nullptr) {
 				EWOLSA_ERROR("can not allocate output interface ... ");
 				return;
@@ -64,18 +64,18 @@ class OutputInterface {
 				EWOLSA_ERROR("call wrong type ... (need int16_t)");
 			}
 			// call music
-			ewolsa::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+			audio::ess::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 			// call Effects
-			//ewolsa::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+			//audio::ess::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 		}
 };
 std::shared_ptr<OutputInterface> g_ioInterface;
 
-void ewolsa::init() {
+void audio::ess::init() {
 	g_ioInterface = std::make_shared<OutputInterface>();
 }
 
-void ewolsa::unInit() {
+void audio::ess::unInit() {
 	g_ioInterface.reset();
 }
 

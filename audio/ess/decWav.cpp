@@ -8,8 +8,8 @@
 
 #include <etk/types.h>
 #include <etk/os/FSNode.h>
-#include <ewolsa/debug.h>
-#include <ewolsa/decWav.h>
+#include <audio/ess/debug.h>
+#include <audio/ess/decWav.h>
 
 
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
 #define COMPR_G721   (64)
 #define COMPR_MPEG   (80)
 
-std::vector<int16_t> ewolsa::wav::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
+std::vector<int16_t> audio::ess::wav::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
 	waveHeader myHeader;
 	memset(&myHeader, 0, sizeof(waveHeader));
 	etk::FSNode fileAccess(_filename);

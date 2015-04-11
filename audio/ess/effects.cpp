@@ -9,11 +9,11 @@
 
 #include <etk/types.h>
 
-#include <ewolsa/debug.h>
-#include <ewolsa/effects.h>
-#include <ewolsa/decWav.h>
+#include <audio/ess/debug.h>
+#include <audio/ess/effects.h>
+#include <audio/ess/decWav.h>
 #include <math.h>
-#include <ewolsa/LoadedFile.h>
+#include <audio/ess/LoadedFile.h>
 #include <mutex>
 
 static std::mutex localMutex;
@@ -29,16 +29,16 @@ static int32_t effectsVolumeApply = 1<<16;
 class RequestPlay {
 	private:
 		bool m_freeSlot;
-		ewolsa::LoadedFile* m_effect; // reference to the effects
+		audio::ess::LoadedFile* m_effect; // reference to the effects
 		int32_t m_playTime; // position in sample playing in the audio effects
 	public :
-		RequestPlay(ewolsa::LoadedFile * _effect) :
+		RequestPlay(audio::ess::LoadedFile * _effect) :
 		  m_freeSlot(false),
 		  m_effect(_effect),
 		  m_playTime(0) {
 			
 		};
-		void reset(ewolsa::LoadedFile * _effect) {
+		void reset(audio::ess::LoadedFile * _effect) {
 			m_effect=_effect;
 			m_playTime=0;
 			m_freeSlot=false;
@@ -78,20 +78,20 @@ class RequestPlay {
 };
 
 #include <vector>
-std::vector<ewolsa::LoadedFile*> ListEffects;
+std::vector<audio::ess::LoadedFile*> ListEffects;
 std::vector<RequestPlay*> ListEffectsPlaying;
 
-void ewolsa::effects::init() {
-	ewolsa::effects::volumeSet(0);
-	ewolsa::effects::muteSet(false);
+void audio::ess::effects::init() {
+	audio::ess::effects::volumeSet(0);
+	audio::ess::effects::muteSet(false);
 }
 
-void ewolsa::effects::unInit() {
-	ewolsa::effects::volumeSet(-1000);
-	ewolsa::effects::muteSet(true);
+void audio::ess::effects::unInit() {
+	audio::ess::effects::volumeSet(-1000);
+	audio::ess::effects::muteSet(true);
 }
 
-int32_t ewolsa::effects::add(const std::string& _file) {
+int32_t audio::ess::effects::add(const std::string& _file) {
 	for (size_t iii=0; iii<ListEffects.size(); iii++) {
 		if (ListEffects[iii] == nullptr) {
 			continue;
@@ -102,7 +102,7 @@ int32_t ewolsa::effects::add(const std::string& _file) {
 		}
 	}
 	// effect does not exist ... create a new one ...
-	ewolsa::LoadedFile * tmpEffect = new ewolsa::LoadedFile(_file);
+	audio::ess::LoadedFile * tmpEffect = new audio::ess::LoadedFile(_file);
 	if (nullptr == tmpEffect) {
 		EWOLSA_ERROR("Error to load the effects : \"" << _file << "\"");
 		return -1;
@@ -111,7 +111,7 @@ int32_t ewolsa::effects::add(const std::string& _file) {
 	return ListEffects.size()-1;
 }
 
-void ewolsa::effects::rm(int32_t _effectId) {
+void audio::ess::effects::rm(int32_t _effectId) {
 	// find element ...
 	if (_effectId <0 || _effectId >= (int64_t)ListEffects.size()) {
 		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not remove it ...");
@@ -132,7 +132,7 @@ void ewolsa::effects::rm(int32_t _effectId) {
 }
 
 
-void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
+void audio::ess::effects::play(int32_t _effectId, float _xxx, float _yyy) {
 	if (_effectId <0 || _effectId >= (int64_t)ListEffects.size()) {
 		EWOLSA_ERROR("Wrong effect ID : " << _effectId << " != [0.." << ListEffects.size()-1 << "]  == > can not play it ...");
 		return;
@@ -158,7 +158,7 @@ void ewolsa::effects::play(int32_t _effectId, float _xxx, float _yyy) {
 }
 
 
-float ewolsa::effects::volumeGet() {
+float audio::ess::effects::volumeGet() {
 	return effectsVolume;
 }
 
@@ -174,7 +174,7 @@ static void uptateEffectVolume() {
 	}
 }
 
-void ewolsa::effects::volumeSet(float _newVolume) {
+void audio::ess::effects::volumeSet(float _newVolume) {
 	effectsVolume = _newVolume;
 	effectsVolume = std::avg(-100.0f, effectsVolume, 20.0f);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << effectsVolume << "dB");
@@ -182,12 +182,12 @@ void ewolsa::effects::volumeSet(float _newVolume) {
 }
 
 
-bool ewolsa::effects::muteGet() {
+bool audio::ess::effects::muteGet() {
 	return effectsMute;
 }
 
 
-void ewolsa::effects::muteSet(bool _newMute) {
+void audio::ess::effects::muteSet(bool _newMute) {
 	effectsMute = _newMute;
 	EWOLSA_INFO("Set effects Mute at " << _newMute);
 	uptateEffectVolume();
@@ -195,7 +195,7 @@ void ewolsa::effects::muteSet(bool _newMute) {
 
 
 
-void ewolsa::effects::getData(int16_t* _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
+void audio::ess::effects::getData(int16_t* _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
 	for (size_t iii = 0; iii < ListEffectsPlaying.size(); ++iii) {
 		if (ListEffectsPlaying[iii]!= nullptr) {
 			ListEffectsPlaying[iii]->play(_bufferInterlace, _nbSample, _nbChannels);

@@ -9,23 +9,23 @@
 
 #include <etk/types.h>
 #include <etk/thread/tools.h>
-#include <ewolsa/debug.h>
-#include <ewolsa/LoadedFile.h>
-#include <ewolsa/decWav.h>
-#include <ewolsa/decOgg.h>
+#include <audio/ess/debug.h>
+#include <audio/ess/LoadedFile.h>
+#include <audio/ess/decWav.h>
+#include <audio/ess/decOgg.h>
 
 static void threadCallback2(void* _userData) {
 	etk::thread::setName("ewolSA decoder");
-	ewolsa::LoadedFile* decodeFile = reinterpret_cast<ewolsa::LoadedFile*>(_userData);
+	audio::ess::LoadedFile* decodeFile = reinterpret_cast<audio::ess::LoadedFile*>(_userData);
 	decodeFile->decode();
 }
 
-void ewolsa::LoadedFile::decode() {
-	m_data = ewolsa::ogg::loadAudioFile(m_file, m_nbChanRequested);
+void audio::ess::LoadedFile::decode() {
+	m_data = audio::ess::ogg::loadAudioFile(m_file, m_nbChanRequested);
 	m_nbSamples = m_data.size();
 }
 
-ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
+audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
   m_thread(nullptr),
   m_file(_fileName),
   m_nbSamples(0),
@@ -34,7 +34,7 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 	std::string tmpName = etk::tolower(m_file);
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
-		m_data = ewolsa::wav::loadAudioFile(m_file, m_nbChanRequested);
+		m_data = audio::ess::wav::loadAudioFile(m_file, m_nbChanRequested);
 		m_nbSamples = m_data.size();
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		EWOLSA_DEBUG("create thread");
@@ -55,7 +55,7 @@ ewolsa::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanReque
 }
 
 
-ewolsa::LoadedFile::~LoadedFile() {
+audio::ess::LoadedFile::~LoadedFile() {
 	if (m_thread != nullptr) {
 		delete m_thread;
 	}

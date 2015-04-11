@@ -11,10 +11,13 @@
 
 #include <etk/log.h>
 
-namespace ewolsa {
-	int32_t getLogId();
-};
-#define EWOLSA_BASE(info,data) TK_LOG_BASE(ewolsa::getLogId(),info,data)
+
+namespace audio {
+	namespace ess {
+		int32_t getLogId();
+	}
+}
+#define EWOLSA_BASE(info,data) TK_LOG_BASE(audio::ess::getLogId(),info,data)
 
 #define EWOLSA_CRITICAL(data)      EWOLSA_BASE(1, data)
 #define EWOLSA_ERROR(data)         EWOLSA_BASE(2, data)

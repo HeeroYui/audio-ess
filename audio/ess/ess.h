@@ -11,13 +11,15 @@
 #define __EWOLSA_H__
 
 #include <etk/types.h>
-#include <ewolsa/effects.h>
-#include <ewolsa/music.h>
+#include <audio/ess/effects.h>
+#include <audio/ess/music.h>
 
-namespace ewolsa {
-	void init();
-	void unInit();
-};
+namespace audio {
+	namespace ess {
+		void init();
+		void unInit();
+	}
+}
 
 #endif
 

@@ -8,8 +8,8 @@
 
 #include <etk/types.h>
 #include <etk/os/FSNode.h>
-#include <ewolsa/debug.h>
-#include <ewolsa/decOgg.h>
+#include <audio/ess/debug.h>
+#include <audio/ess/decOgg.h>
 #include <tremor/ivorbiscodec.h>
 #include <tremor/ivorbisfile.h>
 #include <memory>
@@ -48,7 +48,7 @@ static long localTellFunc(void *datasource) {
 	return file->fileTell();
 }
 
-std::vector<int16_t> ewolsa::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
+std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
 	OggVorbis_File vf;
 	int32_t eof=0;
 	int32_t current_section;

@@ -9,9 +9,9 @@
 
 #include <etk/types.h>
 
-#include <ewolsa/music.h>
-#include <ewolsa/debug.h>
-#include <ewolsa/LoadedFile.h>
+#include <audio/ess/music.h>
+#include <audio/ess/debug.h>
+#include <audio/ess/LoadedFile.h>
 #include <math.h>
 #include <mutex>
 
@@ -22,13 +22,13 @@ static float   musicVolume = 0;
 static int32_t musicVolumeApply = 1<<16;
 static int32_t musicFadingTime = 0;
 static int32_t musicPositionReading = 0;
-static std::vector<ewolsa::LoadedFile*> musicListRead;
+static std::vector<audio::ess::LoadedFile*> musicListRead;
 static int32_t musicCurrentRead = -1;
 static int32_t musicNextRead = -1;
 
-void ewolsa::music::init() {
-	ewolsa::music::volumeSet(0);
-	ewolsa::music::muteSet(false);
+void audio::ess::music::init() {
+	audio::ess::music::volumeSet(0);
+	audio::ess::music::muteSet(false);
 	std::unique_lock<std::mutex> lck(localMutex);
 	musicCurrentRead = -1;
 	musicNextRead = -1;
@@ -43,9 +43,9 @@ void ewolsa::music::init() {
 	musicListRead.clear();
 }
 
-void ewolsa::music::unInit() {
-	ewolsa::music::volumeSet(-1000);
-	ewolsa::music::muteSet(true);
+void audio::ess::music::unInit() {
+	audio::ess::music::volumeSet(-1000);
+	audio::ess::music::muteSet(true);
 	std::unique_lock<std::mutex> lck(localMutex);
 	musicCurrentRead = -1;
 	musicNextRead = -1;
@@ -61,14 +61,14 @@ void ewolsa::music::unInit() {
 }
 
 
-void ewolsa::music::fading(int32_t _timeMs) {
+void audio::ess::music::fading(int32_t _timeMs) {
 	musicFadingTime = _timeMs;
 	musicFadingTime = std::avg(-100, musicFadingTime, 20);
 	EWOLSA_INFO("Set music fading time at " << _timeMs << "ms  == > " << musicFadingTime << "ms");
 }
 
 
-void ewolsa::music::preLoad(const std::string& _file) {
+void audio::ess::music::preLoad(const std::string& _file) {
 	// check if music already existed ...
 	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
 		if (musicListRead[iii] == nullptr) {
@@ -78,7 +78,7 @@ void ewolsa::music::preLoad(const std::string& _file) {
 			return;
 		}
 	}
-	ewolsa::LoadedFile* tmp = new ewolsa::LoadedFile(_file, 2);
+	audio::ess::LoadedFile* tmp = new audio::ess::LoadedFile(_file, 2);
 	if (tmp != nullptr) {
 		/*
 		if (tmp->m_data == nullptr) {
@@ -94,7 +94,7 @@ void ewolsa::music::preLoad(const std::string& _file) {
 }
 
 
-bool ewolsa::music::play(const std::string& _file) {
+bool audio::ess::music::play(const std::string& _file) {
 	preLoad(_file);
 	// in all case we stop the current playing music ...
 	stop();
@@ -119,7 +119,7 @@ bool ewolsa::music::play(const std::string& _file) {
 }
 
 
-bool ewolsa::music::stop() {
+bool audio::ess::music::stop() {
 	if (musicCurrentRead == -1) {
 		EWOLSA_INFO("No current audio is playing");
 		return false;
@@ -131,7 +131,7 @@ bool ewolsa::music::stop() {
 
 
 
-float ewolsa::music::volumeGet() {
+float audio::ess::music::volumeGet() {
 	return musicVolume;
 }
 
@@ -148,7 +148,7 @@ static void uptateMusicVolume() {
 	}
 }
 
-void ewolsa::music::volumeSet(float _newVolume) {
+void audio::ess::music::volumeSet(float _newVolume) {
 	musicVolume = _newVolume;
 	musicVolume = std::avg(-1000.0f, musicVolume, 40.0f);
 	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << musicVolume << "dB");
@@ -156,19 +156,19 @@ void ewolsa::music::volumeSet(float _newVolume) {
 }
 
 
-bool ewolsa::music::muteGet() {
+bool audio::ess::music::muteGet() {
 	return musicMute;
 }
 
 
-void ewolsa::music::muteSet(bool _newMute) {
+void audio::ess::music::muteSet(bool _newMute) {
 	musicMute = _newMute;
 	EWOLSA_INFO("Set music Mute at " << _newMute);
 	uptateMusicVolume();
 }
 
 
-void ewolsa::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
+void audio::ess::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
 	EWOLSA_VERBOSE("Music !!! " << musicCurrentRead << " ... " << musicNextRead << " pos: " << musicPositionReading);
 	std::unique_lock<std::mutex> lck(localMutex);
 	if (musicCurrentRead != musicNextRead) {

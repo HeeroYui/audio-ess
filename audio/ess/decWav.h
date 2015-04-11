@@ -11,11 +11,14 @@
 
 #include <etk/types.h>
 
-namespace ewolsa {
-	namespace wav {
-		std::vector<int16_t> loadAudioFile(const std::string& _filename, int8_t _nbChan);
+
+namespace audio {
+	namespace ess {
+		namespace wav {
+			std::vector<int16_t> loadAudioFile(const std::string& _filename, int8_t _nbChan);
+		}
 	}
-};
+}
 
 #endif
 

@@ -4,25 +4,26 @@ import lutinTools as tools
 import lutinDebug as debug
 
 def get_desc():
-	return "ewolsa : ewol simple audio interface for 'small game' audio effects"
+	return "audio_ess : ewol sound set interface for 'small game' audio effects"
 
 
 def create(target):
-	myModule = module.Module(__file__, 'ewolsa', 'LIBRARY')
+	myModule = module.Module(__file__, 'audio_ess', 'LIBRARY')
 	# System core
 	myModule.add_src_file([
-		'ewolsa/debug.cpp',
-		'ewolsa/decWav.cpp',
-		'ewolsa/decOgg.cpp',
-		'ewolsa/effects.cpp',
-		'ewolsa/ewolsa.cpp',
-		'ewolsa/music.cpp',
-		'ewolsa/LoadedFile.cpp'
+		'audio/ess/debug.cpp',
+		'audio/ess/decWav.cpp',
+		'audio/ess/decOgg.cpp',
+		'audio/ess/effects.cpp',
+		'audio/ess/ess.cpp',
+		'audio/ess/music.cpp',
+		'audio/ess/LoadedFile.cpp'
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk', 'river', 'ogg'])
+	myModule.add_module_depend(['etk', 'audio_river', 'ogg'])
 	if target.name=="Android":
+		# TODO : Change this ...
 		myModule.add_export_flag_CC("-pthread -frtti -fexceptions")
 	
 	myModule.add_export_path(tools.get_current_path(__file__))
