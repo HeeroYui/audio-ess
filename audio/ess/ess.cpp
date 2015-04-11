@@ -29,12 +29,12 @@ class OutputInterface {
 			m_interface = m_manager->createOutput(48000,
 			                                      channelMap,
 			                                      audio::format_int16,
-			                                      "speaker",
-			                                      "audio::ess::basicOutput");
+			                                      "speaker");
 			if (m_interface == nullptr) {
 				EWOLSA_ERROR("can not allocate output interface ... ");
 				return;
 			}
+			m_interface->setName("audio::ess::basicOutput");
 			// set callback mode ...
 			m_interface->setOutputCallback(std::bind(&OutputInterface::onDataNeeded,
 			                                         this,
@@ -66,7 +66,7 @@ class OutputInterface {
 			// call music
 			audio::ess::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 			// call Effects
-			//audio::ess::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
+			audio::ess::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
 		}
 };
 std::shared_ptr<OutputInterface> g_ioInterface;
