@@ -55,7 +55,7 @@ class OutputInterface {
 			m_manager.reset();
 		}
 		void onDataNeeded(void* _data,
-		                  const std::chrono::system_clock::time_point& _playTime,
+		                  const audio::Time& _playTime,
 		                  const size_t& _nbChunk,
 		                  enum audio::format _format,
 		                  uint32_t _frequency,
