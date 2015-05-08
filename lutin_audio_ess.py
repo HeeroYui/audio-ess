@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import lutinModule as module
-import lutinTools as tools
-import lutinDebug as debug
+import lutin.module as module
+import lutin.tools as tools
+import lutin.debug as debug
 
 def get_desc():
 	return "audio_ess : ewol sound set interface for 'small game' audio effects"
@@ -24,7 +24,7 @@ def create(target):
 	myModule.add_module_depend(['etk', 'audio_river', 'ogg'])
 	if target.name=="Android":
 		# TODO : Change this ...
-		myModule.add_export_flag_CC("-pthread -frtti -fexceptions")
+		myModule.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
 	
 	myModule.add_export_path(tools.get_current_path(__file__))
 	
