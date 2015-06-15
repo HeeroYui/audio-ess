@@ -4,11 +4,11 @@ import lutin.tools as tools
 import lutin.debug as debug
 
 def get_desc():
-	return "audio_ess : ewol sound set interface for 'small game' audio effects"
+	return "ewol sound set interface for 'small game' audio effects"
 
 
 def create(target):
-	myModule = module.Module(__file__, 'audio_ess', 'LIBRARY')
+	myModule = module.Module(__file__, 'audio-ess', 'LIBRARY')
 	# System core
 	myModule.add_src_file([
 		'audio/ess/debug.cpp',
@@ -21,7 +21,7 @@ def create(target):
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk', 'audio_river', 'ogg'])
+	myModule.add_module_depend(['etk', 'audio-river', 'ogg'])
 	if target.name=="Android":
 		# TODO : Change this ...
 		myModule.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
