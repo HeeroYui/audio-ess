@@ -38,7 +38,7 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
 		m_data = audio::ess::wav::loadAudioFile(m_file, m_nbChanRequested);
-		m_nbSamples = decodem_data.size();
+		m_nbSamples = m_data.size();
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		/*
 		EWOLSA_DEBUG("create thread");
