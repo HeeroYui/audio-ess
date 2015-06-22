@@ -13,11 +13,14 @@
 #include <audio/ess/LoadedFile.h>
 #include <audio/ess/decWav.h>
 #include <audio/ess/decOgg.h>
+#include <unistd.h>
 
 static void threadCallback2(void* _userData) {
 	etk::thread::setName("ewolSA decoder");
-	audio::ess::LoadedFile* decodeFile = reinterpret_cast<audio::ess::LoadedFile*>(_userData);
-	decodeFile->decode();
+	audio::ess::LoadedFile* decodeFile = static_cast<audio::ess::LoadedFile*>(_userData);
+	if (decodeFile != nullptr) {
+		decodeFile->decode();
+	}
 }
 
 void audio::ess::LoadedFile::decode() {
@@ -35,13 +38,17 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
 		m_data = audio::ess::wav::loadAudioFile(m_file, m_nbChanRequested);
-		m_nbSamples = m_data.size();
+		m_nbSamples = decodem_data.size();
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
+		/*
 		EWOLSA_DEBUG("create thread");
 		m_thread = new std::thread(&threadCallback2, this);
 		EWOLSA_DEBUG("done 1");
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		EWOLSA_DEBUG("done 2");
+		*/
+		// TODO: Set this back to have music decode();
+		// TODO: This is removed to test faster ==> pb on android to create thread ...
 	} else {
 		EWOLSA_ERROR("Extention not managed '" << m_file << "' Sopported extention : .wav / .ogg");
 		return;
