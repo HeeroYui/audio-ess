@@ -62,20 +62,20 @@ std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename
 	// Start loading the XML : 
 	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
 	if (false == fileAccess->exist()) {
-		//EWOLSA_ERROR("File Does not exist : \"" << fileAccess << "\"");
+		EWOLSA_ERROR("File Does not exist : \"" << *fileAccess << "\"");
 		return std::vector<int16_t>();
 	}
 	int32_t fileSize = fileAccess->fileSize();
 	if (0 == fileSize) {
-		//EWOLSA_ERROR("This file is empty : \"" << fileAccess << "\"");
+		EWOLSA_ERROR("This file is empty : \"" << *fileAccess << "\"");
 		return std::vector<int16_t>();
 	}
 	if (false == fileAccess->fileOpenRead()) {
-		//EWOLSA_ERROR("Can not open the file : \"" << fileAccess << "\"");
+		EWOLSA_ERROR("Can not open the file : \"" << *fileAccess << "\"");
 		return std::vector<int16_t>();
 	}
 	if (ov_open_callbacks(&(*fileAccess), &vf, nullptr, 0, tmpCallback) < 0) {
-		//EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
+		EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
 		return std::vector<int16_t>();
 	}
 	vorbis_info *vi=ov_info(&vf,-1);

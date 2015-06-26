@@ -11,14 +11,21 @@
 #define __EWOLSA_LOADED_FILE_H__
 
 #include <etk/types.h>
-#include <thread>
-#include <pthread.h>
+#if defined(__TARGET_OS__Android)
+	#include <pthread.h>
+#else
+	#include <thread>
+#endif
 
 namespace audio {
 	namespace ess {
 		class LoadedFile {
 			private:
-				std::thread* m_thread;
+				#if defined(__TARGET_OS__Android)
+					pthread_t m_thread;
+				#else
+					std::thread* m_thread;
+				#endif
 			public:
 				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 				~LoadedFile();
