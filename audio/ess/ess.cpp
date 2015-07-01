@@ -58,7 +58,7 @@ class OutputInterface {
 		                  const audio::Time& _playTime,
 		                  const size_t& _nbChunk,
 		                  enum audio::format _format,
-		                  uint32_t _frequency,
+		                  uint32_t _sampleRate,
 		                  const std::vector<audio::channel>& _map) {
 			if (_format != audio::format_int16) {
 				EWOLSA_ERROR("call wrong type ... (need int16_t)");
@@ -79,4 +79,35 @@ void audio::ess::unInit() {
 	g_ioInterface.reset();
 }
 
+void audio::ess::loadSoundSet(const std::string& _data) {
+	
+}
+
+void audio::ess::loadSoundSet(const etk::FSNode& _file) {
+	
+}
+
+void audio::ess::musicPlay(const std::string& _name) {
+	
+}
+
+void audio::ess::musicStop() {
+	
+}
+
+void audio::ess::musicVolume(float _dB) {
+	
+}
+
+int32_t audio::ess::effectGetId(const std::string& _name) {
+	return -1;
+}
+
+void audio::ess::effectPlay(int32_t _name, const vec2& _pos=vec2(0,0)) {
+	
+}
+
+void audio::ess::effectPlay(const std::string& _name, const vec2& _pos=vec2(0,0)) {
+	
+}
 

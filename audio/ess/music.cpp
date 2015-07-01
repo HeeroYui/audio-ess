@@ -26,38 +26,44 @@ static std::vector<audio::ess::LoadedFile*> musicListRead;
 static int32_t musicCurrentRead = -1;
 static int32_t musicNextRead = -1;
 
-void audio::ess::music::init() {
-	audio::ess::music::volumeSet(0);
-	audio::ess::music::muteSet(false);
-	std::unique_lock<std::mutex> lck(localMutex);
-	musicCurrentRead = -1;
-	musicNextRead = -1;
-	musicPositionReading = 0;
-	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == nullptr) {
-			continue;
-		}
-		delete musicListRead[iii];
-		musicListRead[iii] = nullptr;
+audio::ess::Music::Music(const std::shared_ptr<audio::river::Manager>& _manager) :
+  m_manager(_manager),
+  m_position(0) {
+	std::unique_lock<std::mutex> lock(m_mutex);
+	//Set stereo output:
+	std::vector<audio::channel> channelMap;
+	channelMap.push_back(audio::channel_frontLeft);
+	channelMap.push_back(audio::channel_frontRight);
+	m_interface = m_manager->createOutput(48000,
+	                                      channelMap,
+	                                      audio::format_int16,
+	                                      "speaker");
+	if (m_interface == nullptr) {
+		EWOLSA_ERROR("can not allocate output interface ... ");
+		return;
 	}
-	musicListRead.clear();
+	m_interface->setName("audio::ess::music");
+	m_interface->addVolumeGroup("MUSIC");
+	// set callback mode ...
+	m_interface->setOutputCallback(std::bind(&audio::ess::Music::onDataNeeded,
+	                                         this,
+	                                         std::placeholders::_1,
+	                                         std::placeholders::_2,
+	                                         std::placeholders::_3,
+	                                         std::placeholders::_4,
+	                                         std::placeholders::_5,
+	                                         std::placeholders::_6));
 }
 
-void audio::ess::music::unInit() {
-	audio::ess::music::volumeSet(-1000);
-	audio::ess::music::muteSet(true);
-	std::unique_lock<std::mutex> lck(localMutex);
-	musicCurrentRead = -1;
-	musicNextRead = -1;
-	musicPositionReading = 0;
-	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == nullptr) {
-			continue;
-		}
-		delete musicListRead[iii];
-		musicListRead[iii] = nullptr;
+audio::ess::Music::~Music() {
+	if (m_interface != nullptr) {
+		m_interface.stop();
 	}
-	musicListRead.clear();
+	m_interface.reset();
+	m_manager.reset();
+	m_list.clear();
+	m_current.reset();
+	m_next.reset();
 }
 
 
