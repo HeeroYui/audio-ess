@@ -13,18 +13,6 @@
 #include <audio/ess/debug.h>
 #include <audio/ess/LoadedFile.h>
 #include <math.h>
-#include <mutex>
-
-static std::mutex localMutex;
-
-static bool    musicMute = false;
-static float   musicVolume = 0;
-static int32_t musicVolumeApply = 1<<16;
-static int32_t musicFadingTime = 0;
-static int32_t musicPositionReading = 0;
-static std::vector<audio::ess::LoadedFile*> musicListRead;
-static int32_t musicCurrentRead = -1;
-static int32_t musicNextRead = -1;
 
 audio::ess::Music::Music(const std::shared_ptr<audio::river::Manager>& _manager) :
   m_manager(_manager),
@@ -67,156 +55,83 @@ audio::ess::Music::~Music() {
 }
 
 
-void audio::ess::music::fading(int32_t _timeMs) {
-	musicFadingTime = _timeMs;
-	musicFadingTime = std::avg(-100, musicFadingTime, 20);
-	EWOLSA_INFO("Set music fading time at " << _timeMs << "ms  == > " << musicFadingTime << "ms");
-}
-
-
-void audio::ess::music::preLoad(const std::string& _file) {
-	// check if music already existed ...
-	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == nullptr) {
-			continue;
-		}
-		if (musicListRead[iii]->getName() == _file) {
-			return;
-		}
+void audio::ess::Music::onDataNeeded(void* _data,
+                                     const audio::Time& _playTime,
+                                     const size_t& _nbChunk,
+                                     enum audio::format _format,
+                                     uint32_t _sampleRate,
+                                     const std::vector<audio::channel>& _map){
+	if (_format != audio::format_int16) {
+		EWOLSA_ERROR("call wrong type ... (need int16_t)");
 	}
-	audio::ess::LoadedFile* tmp = new audio::ess::LoadedFile(_file, 2);
-	if (tmp != nullptr) {
-		/*
-		if (tmp->m_data == nullptr) {
-			EWOLSA_ERROR("Music has no data ... : " << _file);
-			delete(tmp);
-			return;
-		}*/
-		std::unique_lock<std::mutex> lck(localMutex);
-		musicListRead.push_back(tmp);
-	} else {
-		EWOLSA_ERROR("can not preload audio Music");
+	std::unique_lock<std::mutex> lock(m_mutex);
+	if (m_current != m_next) {
+		EWOLSA_INFO("change track " << (m_curent!=nullptr?-1:m_current->getUId()) << " ==> " << (m_next!=nullptr?-1:m_next->getUId()));
+		m_curent = m_next;
+		m_position = 0;
 	}
-}
-
-
-bool audio::ess::music::play(const std::string& _file) {
-	preLoad(_file);
-	// in all case we stop the current playing music ...
-	stop();
-	int32_t idMusic = -1;
-	// check if music already existed ...
-	for (size_t iii=0; iii<musicListRead.size(); ++iii) {
-		if (musicListRead[iii] == nullptr) {
-			continue;
-		}
-		if (musicListRead[iii]->getName() == _file) {
-			idMusic = iii;
-			break;
-		}
-	}
-	if (idMusic == -1) {
-		return false;
-	}
-	std::unique_lock<std::mutex> lck(localMutex);
-	musicNextRead = idMusic;
-	EWOLSA_INFO("Playing track " << musicCurrentRead << " request next : " << idMusic);
-	return true;
-}
-
-
-bool audio::ess::music::stop() {
-	if (musicCurrentRead == -1) {
-		EWOLSA_INFO("No current audio is playing");
-		return false;
-	}
-	std::unique_lock<std::mutex> lck(localMutex);
-	musicNextRead = -1;
-	return true;
-}
-
-
-
-float audio::ess::music::volumeGet() {
-	return musicVolume;
-}
-
-
-static void uptateMusicVolume() {
-	if (musicMute == true) {
-		musicVolumeApply = 0;
-	} else {
-		// convert in an fixpoint value
-		// V2 = V1*10^(db/20)
-		double coef = pow(10, (musicVolume/20) );
-		std::unique_lock<std::mutex> lck(localMutex);
-		musicVolumeApply = (int32_t)(coef * (double)(1<<16));
-	}
-}
-
-void audio::ess::music::volumeSet(float _newVolume) {
-	musicVolume = _newVolume;
-	musicVolume = std::avg(-1000.0f, musicVolume, 40.0f);
-	EWOLSA_INFO("Set music Volume at " << _newVolume << "dB  == > " << musicVolume << "dB");
-	uptateMusicVolume();
-}
-
-
-bool audio::ess::music::muteGet() {
-	return musicMute;
-}
-
-
-void audio::ess::music::muteSet(bool _newMute) {
-	musicMute = _newMute;
-	EWOLSA_INFO("Set music Mute at " << _newMute);
-	uptateMusicVolume();
-}
-
-
-void audio::ess::music::getData(int16_t * _bufferInterlace, int32_t _nbSample, int32_t _nbChannels) {
-	EWOLSA_VERBOSE("Music !!! " << musicCurrentRead << " ... " << musicNextRead << " pos: " << musicPositionReading);
-	std::unique_lock<std::mutex> lck(localMutex);
-	if (musicCurrentRead != musicNextRead) {
-		EWOLSA_DEBUG("change track " << musicCurrentRead << " ==> " << musicNextRead);
-		// TODO : create fading ....
-		musicCurrentRead = musicNextRead;
-		musicPositionReading = 0;
-	}
-	if (musicCurrentRead < 0) {
+	if (m_curent == nullptr) {
 		// nothing to play ...
 		return;
 	}
-	if (   musicCurrentRead >= musicListRead.size()
-	    || musicListRead[musicCurrentRead] == nullptr) {
-		musicCurrentRead = -1;
-		musicPositionReading = 0;
-		EWOLSA_ERROR("request read an unexisting audio track ... : " << musicCurrentRead << "/" << musicListRead.size());
+	if (m_current->m_data.size() == 0) {
 		return;
 	}
-	if (musicListRead[musicCurrentRead]->m_data.size() == 0) {
-		return;
-	}
-	int32_t processTimeMax = std::min(_nbSample*_nbChannels, musicListRead[musicCurrentRead]->m_nbSamples - musicPositionReading);
+	int32_t processTimeMax = std::min(_nbChunk*_map.size(), m_current->m_nbSamples - m_position);
 	processTimeMax = std::max(0, processTimeMax);
-	int16_t * pointer = _bufferInterlace;
-	int16_t * newData = &musicListRead[musicCurrentRead]->m_data[musicPositionReading];
-	EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " nbCannels=" << _nbChannels << " chunkRequest=" << _nbSample);
+	int16_t * pointer = static_cast<int16_t*>(_data);
+	int16_t * newData = &m_current->m_data[m_posiion];
+	EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
-		/*
-		int32_t tmppp = ((int32_t)*pointer) + ((((int32_t)*newData)*musicVolumeApply)>>16);
-		*pointer = std::avg(-32767, tmppp, 32766);
-		*/
-		*pointer = *newData;
-		//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
-		pointer++;
-		newData++;
+		*pointer++ = *newData++;
 	}
-	musicPositionReading += processTimeMax;
+	m_position += processTimeMax;
 	// check end of playing ...
-	if (musicListRead[musicCurrentRead]->m_nbSamples <= musicPositionReading) {
-		musicPositionReading = 0;
-		musicCurrentRead = -1;
+	if (m_current->m_nbSamples <= m_position) {
+		m_position = 0;
+		m_current.reset();
 	}
-	
+}
+
+void audio::ess::Music::load(const std::string& _file, const std::string& _name) {
+	auto it = m_list.find(_name);
+	if (it != m_list.end()) {
+		return;
+	}
+	std::shared_ptr<audio::ess::LoadedFile> tmp = std::make_shared<audio::ess::LoadedFile>(_file, 2);
+	if (tmp == nullptr) {
+		EWOLSA_ERROR("can not load audio Music = " << _file);
+		return;
+	}
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_list.insert(std::pair<std::string,std::shared_ptr<audio::ess::LoadedFile>>(_name,tmp));
+}
+
+void audio::ess::Music::play(const std::string& _name) {
+	auto it = m_list.find(_name);
+	if (it != m_list.end()) {
+		EWOLSA_ERROR("Can not Play music : " << _name);
+		return;
+	}
+	// in all case we stop the current playing music ...
+	stop();
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_next = *it;
+	EWOLSA_INFO("Playing track " << (m_curent!=nullptr?-1:m_current->getUId()) << " request next : " << m_next->getUId());
+}
+
+void audio::ess::Music::stop() {
+	if (m_curent == nullptr) {
+		EWOLSA_INFO("No current audio is playing");
+	}
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_curent.reset();
+}
+
+void audio::ess::Music::clear() {
+	stop();
+	m_current.reset();
+	m_next.reset();
+	m_position = 0;
+	m_list.clear();
 }

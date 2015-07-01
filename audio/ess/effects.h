@@ -11,24 +11,37 @@
 #define __EWOLSA_EFFECTS_H__
 
 #include <etk/types.h>
+#include <audio/river/Interface.h>
+#include <audio/river/Manager.h>
+#include <audio/ess/LoadedFile.h>
+#include <mutex>
 
 namespace audio {
 	namespace ess {
-		// note effect is loaded in memory (then don't create long effect) and unload only when requested
-		namespace effects {
-			void init();
-			void unInit();
-			// note : support file (Mono, 16bit, 48kHz) : .raw or .wav (no encodage) or .ogg (decoded with tremor lib)
-			int32_t add(const std::string& _file);
-			void rm(int32_t _effectId);
-			void play(int32_t _effectId, float _xxx=0, float _yyy=0);
-			// in db
-			float volumeGet();
-			void volumeSet(float _newVolume);
-			bool muteGet();
-			void muteSet(bool _newMute);
-			void getData(int16_t* _bufferInterlace, int32_t _nbSample, int32_t _nbChannels);
-			
+		class Effect {
+			private:
+				mutable std::mutex m_mutex;
+				std::shared_ptr<audio::river::Manager> m_manager;
+				std::shared_ptr<audio::river::Interface> m_interface;
+			public:
+				Effect(const std::shared_ptr<audio::river::Manager>& _manager);
+				~Effect();
+			private:
+				void onDataNeeded(void* _data,
+				                  const audio::Time& _playTime,
+				                  const size_t& _nbChunk,
+				                  enum audio::format _format,
+				                  uint32_t _sampleRate,
+				                  const std::vector<audio::channel>& _map);
+				std::vector<std::pair<std::shared_ptr<audio::ess::LoadedFile>, int32_t>> m_playing; //!< current music read
+				std::vector<std::pair<std::string, std::shared_ptr<audio::ess::LoadedFile>>> m_list; //!< list of all effect loaded
+			public:
+				void load(const std::string& _file, const std::string& _name);
+				int32_t getId(const std::string& _name);
+				void play(const std::string& _name, const vec3& pos = vec3(0,0,0));
+				void play(int32_t _id, const vec3& pos = vec3(0,0,0));
+				void stop();
+				void clear();
 		};
 	}
 }

@@ -21,6 +21,12 @@ namespace audio {
 	namespace ess {
 		class LoadedFile {
 			private:
+				int32_t m_uid;
+			public:
+				int32_t getUId() {
+					return m_uid;
+				}
+			private:
 				#if defined(__TARGET_OS__Android)
 					pthread_t m_thread;
 				#else
