@@ -14,6 +14,9 @@
 #include <audio/ess/LoadedFile.h>
 #include <math.h>
 
+#undef __class__
+#define __class__ "audio::ess::Music"
+
 audio::ess::Music::Music(const std::shared_ptr<audio::river::Manager>& _manager) :
   m_manager(_manager),
   m_position(0) {
@@ -41,11 +44,12 @@ audio::ess::Music::Music(const std::shared_ptr<audio::river::Manager>& _manager)
 	                                         std::placeholders::_4,
 	                                         std::placeholders::_5,
 	                                         std::placeholders::_6));
+	m_interface->start();
 }
 
 audio::ess::Music::~Music() {
 	if (m_interface != nullptr) {
-		m_interface.stop();
+		m_interface->stop();
 	}
 	m_interface.reset();
 	m_manager.reset();
@@ -66,21 +70,21 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
 	if (m_current != m_next) {
-		EWOLSA_INFO("change track " << (m_curent!=nullptr?-1:m_current->getUId()) << " ==> " << (m_next!=nullptr?-1:m_next->getUId()));
-		m_curent = m_next;
+		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
+		m_current = m_next;
 		m_position = 0;
 	}
-	if (m_curent == nullptr) {
+	if (m_current == nullptr) {
 		// nothing to play ...
 		return;
 	}
 	if (m_current->m_data.size() == 0) {
 		return;
 	}
-	int32_t processTimeMax = std::min(_nbChunk*_map.size(), m_current->m_nbSamples - m_position);
+	int32_t processTimeMax = std::min(int32_t(_nbChunk*_map.size()), int32_t(m_current->m_nbSamples - m_position));
 	processTimeMax = std::max(0, processTimeMax);
 	int16_t * pointer = static_cast<int16_t*>(_data);
-	int16_t * newData = &m_current->m_data[m_posiion];
+	int16_t * newData = &m_current->m_data[m_position];
 	EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
 		*pointer++ = *newData++;
@@ -109,23 +113,23 @@ void audio::ess::Music::load(const std::string& _file, const std::string& _name)
 
 void audio::ess::Music::play(const std::string& _name) {
 	auto it = m_list.find(_name);
-	if (it != m_list.end()) {
+	if (it == m_list.end()) {
 		EWOLSA_ERROR("Can not Play music : " << _name);
 		return;
 	}
 	// in all case we stop the current playing music ...
 	stop();
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_next = *it;
-	EWOLSA_INFO("Playing track " << (m_curent!=nullptr?-1:m_current->getUId()) << " request next : " << m_next->getUId());
+	m_next = it->second;
+	EWOLSA_INFO("Playing track " << (m_current==nullptr?-1:m_current->getUId()) << " request next : " << m_next->getUId());
 }
 
 void audio::ess::Music::stop() {
-	if (m_curent == nullptr) {
+	if (m_current == nullptr) {
 		EWOLSA_INFO("No current audio is playing");
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_curent.reset();
+	m_current.reset();
 }
 
 void audio::ess::Music::clear() {

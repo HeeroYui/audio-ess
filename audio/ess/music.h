@@ -15,6 +15,7 @@
 #include <audio/river/Manager.h>
 #include <audio/ess/LoadedFile.h>
 #include <mutex>
+#include <map>
 
 
 namespace audio {
@@ -43,7 +44,7 @@ namespace audio {
 				void play(const std::string& _name);
 				void stop();
 				void clear();
-		}
+		};
 	}
 }
 

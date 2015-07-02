@@ -13,101 +13,142 @@
 #include <audio/river/Manager.h>
 #include <audio/ess/ess.h>
 #include <audio/ess/debug.h>
+#include <ejson/ejson.h>
 
+#undef __class__
+#define __class__ "audio::ess"
 
-class OutputInterface {
-	private:
-		std::shared_ptr<audio::river::Manager> m_manager;
-		std::shared_ptr<audio::river::Interface> m_interface;
-	public:
-		OutputInterface() {
-			m_manager = audio::river::Manager::create("testApplication");
-			//Set stereo output:
-			std::vector<audio::channel> channelMap;
-			channelMap.push_back(audio::channel_frontLeft);
-			channelMap.push_back(audio::channel_frontRight);
-			m_interface = m_manager->createOutput(48000,
-			                                      channelMap,
-			                                      audio::format_int16,
-			                                      "speaker");
-			if (m_interface == nullptr) {
-				EWOLSA_ERROR("can not allocate output interface ... ");
-				return;
-			}
-			m_interface->setName("audio::ess::basicOutput");
-			// set callback mode ...
-			m_interface->setOutputCallback(std::bind(&OutputInterface::onDataNeeded,
-			                                         this,
-			                                         std::placeholders::_1,
-			                                         std::placeholders::_2,
-			                                         std::placeholders::_3,
-			                                         std::placeholders::_4,
-			                                         std::placeholders::_5,
-			                                         std::placeholders::_6));
-			m_interface->start();
-		}
-		~OutputInterface() {
-			if (m_interface == nullptr) {
-				return;
-			}
-			m_interface->stop();
-			m_interface.reset();
-			m_manager.reset();
-		}
-		void onDataNeeded(void* _data,
-		                  const audio::Time& _playTime,
-		                  const size_t& _nbChunk,
-		                  enum audio::format _format,
-		                  uint32_t _sampleRate,
-		                  const std::vector<audio::channel>& _map) {
-			if (_format != audio::format_int16) {
-				EWOLSA_ERROR("call wrong type ... (need int16_t)");
-			}
-			// call music
-			audio::ess::music::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
-			// call Effects
-			audio::ess::effects::getData(static_cast<int16_t*>(_data), _nbChunk, _map.size());
-		}
-};
-std::shared_ptr<OutputInterface> g_ioInterface;
+std::shared_ptr<audio::river::Manager> g_audioManager;
+std::shared_ptr<audio::ess::Effects> g_effects;
+std::shared_ptr<audio::ess::Music> g_music;
 
 void audio::ess::init() {
-	g_ioInterface = std::make_shared<OutputInterface>();
+	g_audioManager = audio::river::Manager::create("ewol-sound-set");
+	g_effects = std::make_shared<audio::ess::Effects>(g_audioManager);
+	g_music = std::make_shared<audio::ess::Music>(g_audioManager);
 }
 
 void audio::ess::unInit() {
-	g_ioInterface.reset();
+	g_effects.reset();
+	g_music.reset();
+	g_audioManager.reset();
 }
 
-void audio::ess::loadSoundSet(const std::string& _data) {
-	
+void audio::ess::soundSetParse(const std::string& _data) {
+	ejson::Document doc;
+	doc.parse(_data);
+	std11::shared_ptr<ejson::Object> obj = doc.getObject("musics");
+	if (    obj != nullptr
+	     && g_music != nullptr) {
+		for (auto &it : obj->getKeys()) {
+			std::string file = obj->getStringValue(it);
+			EWOLSA_INFO("load Music : '" << it << "' file=" << file);
+			g_music->load(file, it);
+		}
+	}
+	obj = doc.getObject("effects");
+	if (    obj != nullptr
+	     && g_effects != nullptr) {
+		for (auto &it : obj->getKeys()) {
+			std::string file = obj->getStringValue(it);
+			EWOLSA_INFO("load Effect : '" << it << "' file=" << file);
+			g_effects->load(file, it);
+		}
+	}
 }
 
-void audio::ess::loadSoundSet(const etk::FSNode& _file) {
-	
+void audio::ess::soundSetLoad(const std::string& _file) {
+	soundSetParse(etk::FSNodeReadAllData(_file));
 }
 
 void audio::ess::musicPlay(const std::string& _name) {
-	
+	if (g_music == nullptr) {
+		return;
+	}
+	g_music->play(_name);
 }
 
 void audio::ess::musicStop() {
-	
+	if (g_music == nullptr) {
+		return;
+	}
+	g_music->stop();
 }
 
-void audio::ess::musicVolume(float _dB) {
-	
+void audio::ess::musicSetVolume(float _dB) {
+	if (g_audioManager == nullptr) {
+		return;
+	}
+	g_audioManager->setVolume("MUSIC", _dB);
+}
+
+float audio::ess::musicGetVolume() {
+	if (g_audioManager == nullptr) {
+		return 0.0f;
+	}
+	return g_audioManager->getVolume("MUSIC");
+}
+
+void audio::ess::musicSetMute(bool _mute) {
+	if (g_audioManager == nullptr) {
+		return;
+	}
+	g_audioManager->setMute("MUSIC", _mute);
+}
+
+bool audio::ess::musicGetMute() {
+	if (g_audioManager == nullptr) {
+		return 0.0f;
+	}
+	return g_audioManager->getMute("MUSIC");
 }
 
 int32_t audio::ess::effectGetId(const std::string& _name) {
-	return -1;
+	if (g_effects == nullptr) {
+		return -1;
+	}
+	return g_effects->getId(_name);
 }
 
-void audio::ess::effectPlay(int32_t _name, const vec2& _pos=vec2(0,0)) {
-	
+void audio::ess::effectPlay(int32_t _id, const vec3& _pos) {
+	if (g_effects == nullptr) {
+		return;
+	}
+	g_effects->play(_id, _pos);
 }
 
-void audio::ess::effectPlay(const std::string& _name, const vec2& _pos=vec2(0,0)) {
-	
+void audio::ess::effectPlay(const std::string& _name, const vec3& _pos) {
+	if (g_effects == nullptr) {
+		return;
+	}
+	g_effects->play(_name, _pos);
+}
+
+void audio::ess::effectSetVolume(float _dB) {
+	if (g_audioManager == nullptr) {
+		return;
+	}
+	g_audioManager->setVolume("EFFECT", _dB);
+}
+
+float audio::ess::effectGetVolume() {
+	if (g_audioManager == nullptr) {
+		return 0.0f;
+	}
+	return g_audioManager->getVolume("EFFECT");
+}
+
+void audio::ess::effectSetMute(bool _mute) {
+	if (g_audioManager == nullptr) {
+		return;
+	}
+	g_audioManager->setMute("EFFECT", _mute);
+}
+
+bool audio::ess::effectGetMute() {
+	if (g_audioManager == nullptr) {
+		return 0.0f;
+	}
+	return g_audioManager->getMute("EFFECT");
 }
 

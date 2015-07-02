@@ -21,7 +21,7 @@ def create(target):
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk', 'audio-river', 'ogg'])
+	myModule.add_module_depend(['etk', 'audio-river', 'ogg', 'ejson'])
 	if target.name=="Android":
 		# TODO : Change this ...
 		myModule.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])

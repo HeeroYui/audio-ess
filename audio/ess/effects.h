@@ -11,6 +11,7 @@
 #define __EWOLSA_EFFECTS_H__
 
 #include <etk/types.h>
+#include <etk/math/Vector3D.h>
 #include <audio/river/Interface.h>
 #include <audio/river/Manager.h>
 #include <audio/ess/LoadedFile.h>
@@ -18,14 +19,14 @@
 
 namespace audio {
 	namespace ess {
-		class Effect {
+		class Effects {
 			private:
 				mutable std::mutex m_mutex;
 				std::shared_ptr<audio::river::Manager> m_manager;
 				std::shared_ptr<audio::river::Interface> m_interface;
 			public:
-				Effect(const std::shared_ptr<audio::river::Manager>& _manager);
-				~Effect();
+				Effects(const std::shared_ptr<audio::river::Manager>& _manager);
+				~Effects();
 			private:
 				void onDataNeeded(void* _data,
 				                  const audio::Time& _playTime,
@@ -38,8 +39,8 @@ namespace audio {
 			public:
 				void load(const std::string& _file, const std::string& _name);
 				int32_t getId(const std::string& _name);
-				void play(const std::string& _name, const vec3& pos = vec3(0,0,0));
-				void play(int32_t _id, const vec3& pos = vec3(0,0,0));
+				void play(const std::string& _name, const vec3& _pos = vec3(0,0,0));
+				void play(int32_t _id, const vec3& _pos = vec3(0,0,0));
 				void stop();
 				void clear();
 		};
