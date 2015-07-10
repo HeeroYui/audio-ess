@@ -11,11 +11,7 @@
 #define __EWOLSA_LOADED_FILE_H__
 
 #include <etk/types.h>
-#if defined(__TARGET_OS__Android)
-	#include <pthread.h>
-#else
-	#include <thread>
-#endif
+#include <thread>
 
 namespace audio {
 	namespace ess {
@@ -27,11 +23,7 @@ namespace audio {
 					return m_uid;
 				}
 			private:
-				#if defined(__TARGET_OS__Android)
-					pthread_t m_thread;
-				#else
-					std::thread* m_thread;
-				#endif
+				std::shared_ptr<std::thread> m_thread;
 			public:
 				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 				~LoadedFile();
@@ -45,6 +37,8 @@ namespace audio {
 					return m_file;
 				};
 				void decode();
+			private:
+				void threadCallback();
 		};
 	}
 }

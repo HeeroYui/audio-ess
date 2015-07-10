@@ -68,6 +68,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	if (_format != audio::format_int16) {
 		EWOLSA_ERROR("call wrong type ... (need int16_t)");
 	}
+	return;
 	std::unique_lock<std::mutex> lock(m_mutex);
 	if (m_current != m_next) {
 		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
