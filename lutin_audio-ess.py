@@ -8,9 +8,9 @@ def get_desc():
 
 
 def create(target):
-	myModule = module.Module(__file__, 'audio-ess', 'LIBRARY')
+	my_module = module.Module(__file__, 'audio-ess', 'LIBRARY')
 	# System core
-	myModule.add_src_file([
+	my_module.add_src_file([
 		'audio/ess/debug.cpp',
 		'audio/ess/decWav.cpp',
 		'audio/ess/decOgg.cpp',
@@ -19,7 +19,7 @@ def create(target):
 		'audio/ess/music.cpp',
 		'audio/ess/LoadedFile.cpp'
 		])
-	myModule.add_header_file([
+	my_module.add_header_file([
 		'audio/ess/effects.h',
 		'audio/ess/ess.h',
 		'audio/ess/music.h',
@@ -27,14 +27,14 @@ def create(target):
 		])
 	
 	# name of the dependency
-	myModule.add_module_depend(['etk', 'audio-river', 'ogg', 'ejson'])
+	my_module.add_module_depend(['etk', 'audio-river', 'ogg', 'ejson'])
 	if target.name=="Android":
 		# TODO : Change this ...
-		myModule.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
+		my_module.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
 	
-	myModule.add_path(tools.get_current_path(__file__))
+	my_module.add_path(tools.get_current_path(__file__))
 	
 	# add the currrent module at the 
-	return myModule
+	return my_module
 
 
