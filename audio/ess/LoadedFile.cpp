@@ -15,13 +15,18 @@
 #include <audio/ess/decOgg.h>
 #include <unistd.h>
 
-void audio::ess::LoadedFile::threadCallback() {
-	//etk::thread::setName("audio-ess decoder");
-	//decode();
-}
-static void threadCallback222() {
-	//etk::thread::setName("audio-ess decoder");
-	//decode();
+#if defined(__TARGET_OS__Android)
+	void* audio::ess::LoadedFile::threadCallback(void* _userData) {
+		audio::ess::LoadedFile* threadHandle = static_cast<audio::ess::LoadedFile*>(_userData);
+		if (threadHandle != nullptr) {
+			threadHandle->threadCall();
+		}
+		return nullptr;
+	}
+#endif
+
+void audio::ess::LoadedFile::threadCall() {
+	decode();
 }
 
 void audio::ess::LoadedFile::decode() {
@@ -32,11 +37,13 @@ void audio::ess::LoadedFile::decode() {
 }
 
 audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
-  m_thread(nullptr),
+  #if !defined(__TARGET_OS__Android)
+  	m_thread(nullptr),
+  #endif
   m_file(_fileName),
   m_nbSamples(0),
   m_nbChanRequested(_nbChanRequested),
-  m_requestedTime(1){
+  m_requestedTime(1) {
 	std::string tmpName = etk::tolower(m_file);
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
@@ -45,18 +52,18 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		#if 1
 			EWOLSA_INFO("create thread");
-			
-			//m_thread = std::make_shared<std::thread>(&audio::ess::LoadedFile::threadCallback, this);
-			//m_thread = std::make_shared<std::thread>(&threadCallback222);
-			static std::thread plop(&threadCallback222);
-			plop.detach();
-			EWOLSA_INFO("done 1");
-			std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-			EWOLSA_INFO("done 2");
+			#if defined(__TARGET_OS__Android)
+				pthread_create(&m_thread, nullptr, &audio::ess::LoadedFile::threadCallback, this);
+			#else
+				m_thread = std11::make_shared<std11::thread>(&audio::ess::LoadedFile::threadCall, this);
+				if (m_thread == nullptr) {
+					GALE_ERROR("Can not create thread ...");
+					return;
+				}
+			#endif
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		#else
-			EWOLSA_DEBUG("done 1");
 			decode();
-			EWOLSA_DEBUG("done 2");
 		#endif
 	} else {
 		EWOLSA_ERROR("Extention not managed '" << m_file << "' Sopported extention : .wav / .ogg");
@@ -65,10 +72,15 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 }
 
 audio::ess::LoadedFile::~LoadedFile() {
-	if (m_thread != nullptr) {
-		//m_thread->join();
-	}
-	//m_thread.reset();
+	#if defined(__TARGET_OS__Android)
+		void* ret = nullptr;
+		int val = pthread_join(m_thread, &ret);
+	#else
+		if (m_thread != nullptr) {
+			m_thread->join();
+		}
+		m_thread.reset();
+	#endif
 }
 
 

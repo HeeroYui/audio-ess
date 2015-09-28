@@ -23,7 +23,11 @@ namespace audio {
 					return m_uid;
 				}
 			private:
-				std::shared_ptr<std::thread> m_thread;
+				#if defined(__TARGET_OS__Android)
+					pthread_t m_thread;
+				#else
+					std11::shared_ptr<std11::thread> m_thread;
+				#endif
 			public:
 				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
 				~LoadedFile();
@@ -38,7 +42,10 @@ namespace audio {
 				};
 				void decode();
 			private:
-				void threadCallback();
+				#if defined(__TARGET_OS__Android)
+					static void* threadCallback(void* _userData);
+				#endif
+				void threadCall();
 		};
 	}
 }
