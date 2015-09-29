@@ -30,10 +30,10 @@ void audio::ess::LoadedFile::threadCall() {
 }
 
 void audio::ess::LoadedFile::decode() {
-	EWOLSA_INFO("Start decode OGG : " << m_file);
+	EWOLSA_ERROR("Start decode OGG : " << m_file);
 	m_data = audio::ess::ogg::loadAudioFile(m_file, m_nbChanRequested);
 	m_nbSamples = m_data.size();
-	EWOLSA_INFO("End decode OGG : " << m_file << " size=" << m_nbSamples);
+	EWOLSA_ERROR("End decode OGG : " << m_file << " size=" << m_nbSamples);
 }
 
 audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
@@ -57,7 +57,7 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 			#else
 				m_thread = std11::make_shared<std11::thread>(&audio::ess::LoadedFile::threadCall, this);
 				if (m_thread == nullptr) {
-					GALE_ERROR("Can not create thread ...");
+					EWOLSA_ERROR("Can not create thread ...");
 					return;
 				}
 			#endif

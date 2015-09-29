@@ -68,7 +68,6 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	if (_format != audio::format_int16) {
 		EWOLSA_ERROR("call wrong type ... (need int16_t)");
 	}
-	return;
 	std::unique_lock<std::mutex> lock(m_mutex);
 	if (m_current != m_next) {
 		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
@@ -86,7 +85,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	processTimeMax = std::max(0, processTimeMax);
 	int16_t * pointer = static_cast<int16_t*>(_data);
 	int16_t * newData = &m_current->m_data[m_position];
-	EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
+	EWOLSA_VERBOSE("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
 		*pointer++ = *newData++;
 	}
