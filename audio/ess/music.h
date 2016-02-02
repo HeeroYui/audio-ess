@@ -5,10 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-
-#ifndef __EWOLSA_MUSIC_H__
-#define __EWOLSA_MUSIC_H__
+#pragma once
 
 #include <etk/types.h>
 #include <audio/river/Interface.h>
@@ -47,6 +44,4 @@ namespace audio {
 		};
 	}
 }
-
-#endif
 

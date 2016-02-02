@@ -5,10 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-
-#ifndef __EWOLSA_H__
-#define __EWOLSA_H__
+#pragma once
 
 #include <etk/types.h>
 #include <audio/ess/effects.h>
@@ -38,6 +35,4 @@ namespace audio {
 		bool effectGetMute();
 	}
 }
-
-#endif
 

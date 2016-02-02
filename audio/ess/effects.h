@@ -5,10 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-
-#ifndef __EWOLSA_EFFECTS_H__
-#define __EWOLSA_EFFECTS_H__
+#pragma once
 
 #include <etk/types.h>
 #include <etk/math/Vector3D.h>
@@ -46,6 +43,4 @@ namespace audio {
 		};
 	}
 }
-
-#endif
 

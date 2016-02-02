@@ -5,12 +5,9 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __EWOLSA_DEC_WAV_H__
-#define __EWOLSA_DEC_WAV_H__
+#pragma once
 
 #include <etk/types.h>
-
 
 namespace audio {
 	namespace ess {
@@ -19,6 +16,4 @@ namespace audio {
 		}
 	}
 }
-
-#endif
 

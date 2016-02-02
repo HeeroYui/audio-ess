@@ -5,9 +5,7 @@
  * 
  * @license APACHE v2.0 (see license file)
  */
-
-#ifndef __EWOLSA_DEBUG_H__
-#define __EWOLSA_DEBUG_H__
+#pragma once
 
 #include <etk/log.h>
 
@@ -42,6 +40,4 @@ namespace audio {
 		} \
 	} while (0)
 
-
-#endif
 
