@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include <etk/log.h>
+#include <elog/log.h>
 
 
 namespace audio {
@@ -15,7 +15,7 @@ namespace audio {
 		int32_t getLogId();
 	}
 }
-#define EWOLSA_BASE(info,data) TK_LOG_BASE(audio::ess::getLogId(),info,data)
+#define EWOLSA_BASE(info,data) ELOG_BASE(audio::ess::getLogId(),info,data)
 
 #define EWOLSA_CRITICAL(data)      EWOLSA_BASE(1, data)
 #define EWOLSA_ERROR(data)         EWOLSA_BASE(2, data)

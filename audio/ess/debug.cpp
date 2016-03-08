@@ -9,6 +9,6 @@
 #include <audio/ess/debug.h>
 
 int32_t audio::ess::getLogId() {
-	static int32_t g_val = etk::log::registerInstance("audio-ess");
+	static int32_t g_val = elog::registerInstance("audio-ess");
 	return g_val;
 }

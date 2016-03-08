@@ -8,7 +8,7 @@
 
 
 #include <etk/types.h>
-#include <etk/thread/tools.h>
+#include <ethread/tools.h>
 #include <audio/ess/debug.h>
 #include <audio/ess/LoadedFile.h>
 #include <audio/ess/decWav.h>
@@ -55,7 +55,7 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
 			#if defined(__TARGET_OS__Android)
 				pthread_create(&m_thread, nullptr, &audio::ess::LoadedFile::threadCallback, this);
 			#else
-				m_thread = std11::make_shared<std11::thread>(&audio::ess::LoadedFile::threadCall, this);
+				m_thread = std::make_shared<std::thread>(&audio::ess::LoadedFile::threadCall, this);
 				if (m_thread == nullptr) {
 					EWOLSA_ERROR("Can not create thread ...");
 					return;

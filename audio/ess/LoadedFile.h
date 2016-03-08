@@ -23,7 +23,7 @@ namespace audio {
 				#if defined(__TARGET_OS__Android)
 					pthread_t m_thread;
 				#else
-					std11::shared_ptr<std11::thread> m_thread;
+					std::shared_ptr<std::thread> m_thread;
 				#endif
 			public:
 				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);

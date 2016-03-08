@@ -37,7 +37,7 @@ void audio::ess::unInit() {
 void audio::ess::soundSetParse(const std::string& _data) {
 	ejson::Document doc;
 	doc.parse(_data);
-	std11::shared_ptr<ejson::Object> obj = doc.getObject("musics");
+	std::shared_ptr<ejson::Object> obj = doc.getObject("musics");
 	if (    obj != nullptr
 	     && g_music != nullptr) {
 		for (auto &it : obj->getKeys()) {
