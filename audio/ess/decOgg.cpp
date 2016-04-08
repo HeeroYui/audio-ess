@@ -22,13 +22,13 @@ static size_t LocalReadFunc(void *ptr, size_t size, size_t nmemb, void *datasour
 
 static int localSeekFunc(void *datasource, ogg_int64_t offset, int whence) {
 	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
-	enum etk::seekNode mode = etk::FSN_SEEK_START;
+	enum etk::seekNode mode = etk::seekNode_start;
 	if (whence == SEEK_SET) {
-		mode = etk::FSN_SEEK_START;
+		mode = etk::seekNode_start;
 	} else if (whence == SEEK_END) {
-		mode = etk::FSN_SEEK_END;
+		mode = etk::seekNode_end;
 	} else if (whence == SEEK_CUR) {
-		mode = etk::FSN_SEEK_CURRENT;
+		mode = etk::seekNode_current;
 	}
 	if (file->fileSeek(offset, mode) == true) {
 		return 0;
