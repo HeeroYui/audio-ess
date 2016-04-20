@@ -37,20 +37,20 @@ void audio::ess::unInit() {
 void audio::ess::soundSetParse(const std::string& _data) {
 	ejson::Document doc;
 	doc.parse(_data);
-	std::shared_ptr<ejson::Object> obj = doc.getObject("musics");
-	if (    obj != nullptr
+	ejson::Object obj = doc["musics"].toObject();
+	if (    obj.exist() == true
 	     && g_music != nullptr) {
-		for (auto &it : obj->getKeys()) {
-			std::string file = obj->getStringValue(it);
+		for (auto &it : obj.getKeys()) {
+			std::string file = obj.getStringValue(it);
 			EWOLSA_INFO("load Music : '" << it << "' file=" << file);
 			g_music->load(file, it);
 		}
 	}
-	obj = doc.getObject("effects");
-	if (    obj != nullptr
+	obj = doc["effects"].toObject();
+	if (    obj.exist() == true
 	     && g_effects != nullptr) {
-		for (auto &it : obj->getKeys()) {
-			std::string file = obj->getStringValue(it);
+		for (auto &it : obj.getKeys()) {
+			std::string file = obj.getStringValue(it);
 			EWOLSA_INFO("load Effect : '" << it << "' file=" << file);
 			g_effects->load(file, it);
 		}
