@@ -15,9 +15,6 @@
 #include <audio/ess/debug.h>
 #include <ejson/ejson.h>
 
-#undef __class__
-#define __class__ "audio::ess"
-
 std::shared_ptr<audio::river::Manager> g_audioManager;
 std::shared_ptr<audio::ess::Effects> g_effects;
 std::shared_ptr<audio::ess::Music> g_music;
@@ -41,7 +38,7 @@ void audio::ess::soundSetParse(const std::string& _data) {
 	if (    obj.exist() == true
 	     && g_music != nullptr) {
 		for (auto &it : obj.getKeys()) {
-			std::string file = obj.getStringValue(it);
+			std::string file = obj[it].toString().get();
 			EWOLSA_INFO("load Music : '" << it << "' file=" << file);
 			g_music->load(file, it);
 		}
@@ -50,7 +47,7 @@ void audio::ess::soundSetParse(const std::string& _data) {
 	if (    obj.exist() == true
 	     && g_effects != nullptr) {
 		for (auto &it : obj.getKeys()) {
-			std::string file = obj.getStringValue(it);
+			std::string file = obj[it].toString().get();
 			EWOLSA_INFO("load Effect : '" << it << "' file=" << file);
 			g_effects->load(file, it);
 		}
