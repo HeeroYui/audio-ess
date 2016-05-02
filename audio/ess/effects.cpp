@@ -1,8 +1,6 @@
 /**
  * @author Edouard DUPIN
- * 
  * @copyright 2011, Edouard DUPIN, all right reserved
- * 
  * @license APACHE v2.0 (see license file)
  */
 
@@ -13,10 +11,6 @@
 #include <audio/ess/effects.h>
 #include <audio/ess/decWav.h>
 #include <math.h>
-
-
-#undef __class__
-#define __class__ "audio::ess::Effects"
 
 audio::ess::Effects::Effects(const std::shared_ptr<audio::river::Manager>& _manager) :
   m_manager(_manager) {
