@@ -12,7 +12,7 @@
 #include <audio/ess/LoadedFile.h>
 #include <math.h>
 
-audio::ess::Music::Music(const std::shared_ptr<audio::river::Manager>& _manager) :
+audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manager) :
   m_manager(_manager),
   m_position(0) {
 	std::unique_lock<std::mutex> lock(m_mutex);
@@ -97,13 +97,13 @@ void audio::ess::Music::load(const std::string& _file, const std::string& _name)
 	if (it != m_list.end()) {
 		return;
 	}
-	std::shared_ptr<audio::ess::LoadedFile> tmp = std::make_shared<audio::ess::LoadedFile>(_file, 2);
+	ememory::SharedPtr<audio::ess::LoadedFile> tmp = ememory::makeShared<audio::ess::LoadedFile>(_file, 2);
 	if (tmp == nullptr) {
 		EWOLSA_ERROR("can not load audio Music = " << _file);
 		return;
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_list.insert(std::pair<std::string,std::shared_ptr<audio::ess::LoadedFile>>(_name,tmp));
+	m_list.insert(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
 }
 
 void audio::ess::Music::play(const std::string& _name) {

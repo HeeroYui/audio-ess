@@ -13,14 +13,14 @@
 #include <audio/ess/debug.h>
 #include <ejson/ejson.h>
 
-std::shared_ptr<audio::river::Manager> g_audioManager;
-std::shared_ptr<audio::ess::Effects> g_effects;
-std::shared_ptr<audio::ess::Music> g_music;
+ememory::SharedPtr<audio::river::Manager> g_audioManager;
+ememory::SharedPtr<audio::ess::Effects> g_effects;
+ememory::SharedPtr<audio::ess::Music> g_music;
 
 void audio::ess::init() {
 	g_audioManager = audio::river::Manager::create("ewol-sound-set");
-	g_effects = std::make_shared<audio::ess::Effects>(g_audioManager);
-	g_music = std::make_shared<audio::ess::Music>(g_audioManager);
+	g_effects = ememory::makeShared<audio::ess::Effects>(g_audioManager);
+	g_music = ememory::makeShared<audio::ess::Music>(g_audioManager);
 }
 
 void audio::ess::unInit() {

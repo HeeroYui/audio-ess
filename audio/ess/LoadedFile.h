@@ -7,6 +7,7 @@
 
 #include <etk/types.h>
 #include <thread>
+#include <ememory/memory.h>
 
 namespace audio {
 	namespace ess {
@@ -21,7 +22,7 @@ namespace audio {
 				#if defined(__TARGET_OS__Android)
 					pthread_t m_thread;
 				#else
-					std::shared_ptr<std::thread> m_thread;
+					ememory::SharedPtr<std::thread> m_thread;
 				#endif
 			public:
 				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);

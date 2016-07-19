@@ -17,10 +17,10 @@ namespace audio {
 		class Effects {
 			private:
 				mutable std::mutex m_mutex;
-				std::shared_ptr<audio::river::Manager> m_manager;
-				std::shared_ptr<audio::river::Interface> m_interface;
+				ememory::SharedPtr<audio::river::Manager> m_manager;
+				ememory::SharedPtr<audio::river::Interface> m_interface;
 			public:
-				Effects(const std::shared_ptr<audio::river::Manager>& _manager);
+				Effects(const ememory::SharedPtr<audio::river::Manager>& _manager);
 				~Effects();
 			private:
 				void onDataNeeded(void* _data,
@@ -29,8 +29,8 @@ namespace audio {
 				                  enum audio::format _format,
 				                  uint32_t _sampleRate,
 				                  const std::vector<audio::channel>& _map);
-				std::vector<std::pair<std::shared_ptr<audio::ess::LoadedFile>, int32_t>> m_playing; //!< current music read
-				std::vector<std::pair<std::string, std::shared_ptr<audio::ess::LoadedFile>>> m_list; //!< list of all effect loaded
+				std::vector<std::pair<ememory::SharedPtr<audio::ess::LoadedFile>, int32_t>> m_playing; //!< current music read
+				std::vector<std::pair<std::string, ememory::SharedPtr<audio::ess::LoadedFile>>> m_list; //!< list of all effect loaded
 			public:
 				void load(const std::string& _file, const std::string& _name);
 				int32_t getId(const std::string& _name);

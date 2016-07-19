@@ -12,7 +12,7 @@
 #include <audio/ess/decWav.h>
 #include <math.h>
 
-audio::ess::Effects::Effects(const std::shared_ptr<audio::river::Manager>& _manager) :
+audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _manager) :
   m_manager(_manager) {
 	std::unique_lock<std::mutex> lock(m_mutex);
 	//Set stereo output:
@@ -51,7 +51,7 @@ audio::ess::Effects::~Effects() {
 }
 
 
-static bool playData(const std::shared_ptr<audio::ess::LoadedFile>& _file, int32_t& _position, int16_t* _bufferInterlace, int32_t _nbSample) {
+static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, int32_t& _position, int16_t* _bufferInterlace, int32_t _nbSample) {
 	if (    _file == nullptr
 	     || _file->m_data.size() == 0) {
 		return true;
@@ -59,7 +59,7 @@ static bool playData(const std::shared_ptr<audio::ess::LoadedFile>& _file, int32
 	int32_t processTimeMax = std::min(_nbSample, _file->m_nbSamples - _position);
 	processTimeMax = std::max(0, processTimeMax);
 	int16_t * pointer = _bufferInterlace;
-	int16_t * newData = &_file->m_data[_position];
+	const int16_t * newData = &_file->m_data[_position];
 	//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
 		int32_t tmppp = int32_t(*_bufferInterlace) + int32_t(*newData);
@@ -99,7 +99,7 @@ void audio::ess::Effects::onDataNeeded(void* _data,
 
 void audio::ess::Effects::load(const std::string& _file, const std::string& _name) {
 	// load the file:
-	std::shared_ptr<audio::ess::LoadedFile> tmp = std::make_shared<audio::ess::LoadedFile>(_file, 2);
+	ememory::SharedPtr<audio::ess::LoadedFile> tmp = ememory::makeShared<audio::ess::LoadedFile>(_file, 2);
 	if (tmp == nullptr) {
 		EWOLSA_ERROR("can not load audio Effects = " << _file);
 		return;
@@ -113,7 +113,7 @@ void audio::ess::Effects::load(const std::string& _file, const std::string& _nam
 		}
 	}
 	if (-1 <= id) {
-		m_list.push_back(std::pair<std::string,std::shared_ptr<audio::ess::LoadedFile>>(_name,tmp));
+		m_list.push_back(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
 	} else {
 		m_list[id].second = tmp;
 	}
@@ -126,7 +126,7 @@ int32_t audio::ess::Effects::getId(const std::string& _name) {
 			return iii;
 		}
 	}
-	m_list.push_back(std::pair<std::string,std::shared_ptr<audio::ess::LoadedFile>>(_name,nullptr));
+	m_list.push_back(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,nullptr));
 	EWOLSA_WARNING("Can not find element name : '" << _name << "' added it ... (empty) ");
 	return m_list.size()-1;
 }
@@ -138,7 +138,7 @@ void audio::ess::Effects::play(int32_t _id, const vec3& _pos) {
 		EWOLSA_ERROR(" Can not play element audio with ID=" << _id << " out of [0.." << m_list.size() << "[");
 		return;
 	}
-	m_playing.push_back(std::pair<std::shared_ptr<audio::ess::LoadedFile>, int32_t>(m_list[_id].second, 0));
+	m_playing.push_back(std::pair<ememory::SharedPtr<audio::ess::LoadedFile>, int32_t>(m_list[_id].second, 0));
 }
 
 void audio::ess::Effects::play(const std::string& _name, const vec3& _pos) {

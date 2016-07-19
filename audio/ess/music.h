@@ -18,10 +18,10 @@ namespace audio {
 		class Music {
 			private:
 				mutable std::mutex m_mutex;
-				std::shared_ptr<audio::river::Manager> m_manager;
-				std::shared_ptr<audio::river::Interface> m_interface;
+				ememory::SharedPtr<audio::river::Manager> m_manager;
+				ememory::SharedPtr<audio::river::Interface> m_interface;
 			public:
-				Music(const std::shared_ptr<audio::river::Manager>& _manager);
+				Music(const ememory::SharedPtr<audio::river::Manager>& _manager);
 				~Music();
 			private:
 				void onDataNeeded(void* _data,
@@ -30,10 +30,10 @@ namespace audio {
 				                  enum audio::format _format,
 				                  uint32_t _sampleRate,
 				                  const std::vector<audio::channel>& _map);
-				std::shared_ptr<audio::ess::LoadedFile> m_current; //!< current music read
+				ememory::SharedPtr<audio::ess::LoadedFile> m_current; //!< current music read
 				int32_t m_position; //!< current position of music read
-				std::map<std::string, std::shared_ptr<audio::ess::LoadedFile> > m_list; //!< list of all music loaded
-				std::shared_ptr<audio::ess::LoadedFile> m_next; //!< next music to read
+				std::map<std::string, ememory::SharedPtr<audio::ess::LoadedFile> > m_list; //!< list of all music loaded
+				ememory::SharedPtr<audio::ess::LoadedFile> m_next; //!< next music to read
 			public:
 				void load(const std::string& _file, const std::string& _name);
 				void play(const std::string& _name);
