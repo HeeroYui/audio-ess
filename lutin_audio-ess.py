@@ -44,7 +44,7 @@ def create(target, module_name):
 		'audio/ess/LoadedFile.h'
 		])
 	# name of the dependency
-	my_module.add_module_depend(['etk', 'audio-river', 'ogg', 'ejson'])
+	my_module.add_depend(['etk', 'audio-river', 'ogg', 'ejson'])
 	if target.name=="Android":
 		# TODO : Change this ...
 		my_module.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
