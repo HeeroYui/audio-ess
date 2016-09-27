@@ -10,7 +10,7 @@
 namespace audio {
 	namespace ess {
 		namespace ogg {
-			std::vector<int16_t> loadAudioFile(const std::string& _filename, int8_t _nbChan);
+			std::vector<float> loadAudioFile(const std::string& _filename, int8_t _nbChan);
 			
 		}
 	}

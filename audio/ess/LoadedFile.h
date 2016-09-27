@@ -31,7 +31,7 @@ namespace audio {
 				int32_t m_nbSamples;
 				int32_t m_nbChanRequested;
 				int32_t m_requestedTime;
-				std::vector<int16_t> m_data;
+				std::vector<float> m_data;
 			public:
 				const std::string& getName() {
 					return m_file;

@@ -46,7 +46,8 @@ static long localTellFunc(void *datasource) {
 	return file->fileTell();
 }
 
-std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
+std::vector<float> audio::ess::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
+	std::vector<float> out;
 	OggVorbis_File vf;
 	int32_t eof=0;
 	int32_t current_section;
@@ -61,20 +62,20 @@ std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename
 	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
 	if (false == fileAccess->exist()) {
 		EWOLSA_ERROR("File Does not exist : \"" << *fileAccess << "\"");
-		return std::vector<int16_t>();
+		return out;
 	}
 	int32_t fileSize = fileAccess->fileSize();
 	if (0 == fileSize) {
 		EWOLSA_ERROR("This file is empty : \"" << *fileAccess << "\"");
-		return std::vector<int16_t>();
+		return out;
 	}
 	if (false == fileAccess->fileOpenRead()) {
 		EWOLSA_ERROR("Can not open the file : \"" << *fileAccess << "\"");
-		return std::vector<int16_t>();
+		return out;
 	}
 	if (ov_open_callbacks(&(*fileAccess), &vf, nullptr, 0, tmpCallback) < 0) {
 		EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
-		return std::vector<int16_t>();
+		return out;
 	}
 	vorbis_info *vi=ov_info(&vf,-1);
 	int32_t nbSampleOut = ov_pcm_total(&vf,-1) / vi->channels;
@@ -91,8 +92,7 @@ std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename
 		EWOLSA_DEBUG("time: " << ((float)_nbSampleOut/(float)vi->rate)/60.0);
 	}
 	*/
-	std::vector<int16_t> outputData;
-	outputData.resize(nbSampleOut*_nbChan, 0);
+	out.resize(nbSampleOut*_nbChan, 0);
 	int32_t pos = 0;
 	char pcmout[4096];
 	while(!eof){
@@ -104,26 +104,29 @@ std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename
 			if(ret==OV_EBADLINK){
 				//EWOLSA_ERROR("Corrupt bitstream section! Exiting.");
 				// TODO : Remove pointer data ...
-				return std::vector<int16_t>();
+				return out;
 			}
 		} else {
 			int16_t* pointerIn = (int16_t*)pcmout;
-			int16_t* pointerOut = &outputData[0]+pos;
+			float* pointerOut = &out[0]+pos;
 			if (_nbChan == vi->channels) {
-				memcpy(pointerOut, pointerIn, ret);
+				// 1/32768 = 0.00003051757f
+				for (int32_t iii=0; iii<ret/2; ++iii) {
+					pointerOut[iii] = float(pointerIn[iii]) * 0.00003051757f;
+				}
 				pos += ret/2;
 			} else {
 				if (    _nbChan == 1
 				     && vi->channels == 2) {
 					for (int32_t iii=0; iii<ret/4 ; ++iii) {
-						pointerOut[iii] = pointerIn[iii*2];
+						pointerOut[iii] = float(pointerIn[iii*2]) * 0.00003051757f;
 					}
 					pos += ret/4;
 				} else if (    _nbChan == 2
 				            && vi->channels == 1) {
 					for (int32_t iii=0; iii<ret/2 ; ++iii) {
-						pointerOut[iii*2]   = pointerIn[iii];
-						pointerOut[iii*2+1] = pointerIn[iii];
+						pointerOut[iii*2]   = float(pointerIn[iii]) * 0.00003051757f;
+						pointerOut[iii*2+1] = float(pointerIn[iii]) * 0.00003051757f;
 					}
 					pos += ret;
 				} else {
@@ -137,6 +140,6 @@ std::vector<int16_t> audio::ess::ogg::loadAudioFile(const std::string& _filename
 	// cleanup
 	ov_clear(&vf);
 	//EWOLSA_DEBUG("Done.");
-	return outputData;
+	return out;
 }
 

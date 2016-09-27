@@ -20,7 +20,7 @@ audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _m
 	channelMap.push_back(audio::channel_frontCenter);
 	m_interface = m_manager->createOutput(48000,
 	                                      channelMap,
-	                                      audio::format_int16,
+	                                      audio::format_float,
 	                                      "speaker");
 	if (m_interface == nullptr) {
 		EWOLSA_ERROR("can not allocate output interface ... ");
@@ -51,19 +51,18 @@ audio::ess::Effects::~Effects() {
 }
 
 
-static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, int32_t& _position, int16_t* _bufferInterlace, int32_t _nbSample) {
+static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, int32_t& _position, float* _bufferInterlace, int32_t _nbSample) {
 	if (    _file == nullptr
 	     || _file->m_data.size() == 0) {
 		return true;
 	}
 	int32_t processTimeMax = std::min(_nbSample, _file->m_nbSamples - _position);
 	processTimeMax = std::max(0, processTimeMax);
-	int16_t * pointer = _bufferInterlace;
-	const int16_t * newData = &_file->m_data[_position];
+	float * pointer = _bufferInterlace;
+	const float * newData = &_file->m_data[_position];
 	//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
-		int32_t tmppp = int32_t(*_bufferInterlace) + int32_t(*newData);
-		*_bufferInterlace = std::avg(-32767, tmppp, 32766);
+		*_bufferInterlace += *newData;
 		//EWOLSA_DEBUG("AUDIO : element : " << *pointer);
 		_bufferInterlace++;
 		newData++;
@@ -77,18 +76,18 @@ static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, in
 }
 
 void audio::ess::Effects::onDataNeeded(void* _data,
-                                     const audio::Time& _playTime,
-                                     const size_t& _nbChunk,
-                                     enum audio::format _format,
-                                     uint32_t _sampleRate,
-                                     const std::vector<audio::channel>& _map){
-	if (_format != audio::format_int16) {
-		EWOLSA_ERROR("call wrong type ... (need int16_t)");
+                                       const audio::Time& _playTime,
+                                       const size_t& _nbChunk,
+                                       enum audio::format _format,
+                                       uint32_t _sampleRate,
+                                       const std::vector<audio::channel>& _map){
+	if (_format != audio::format_float) {
+		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
 	auto it = m_playing.begin();
 	while (it != m_playing.end()) {
-		bool ret = playData((*it).first, (*it).second, static_cast<int16_t*>(_data), _nbChunk);
+		bool ret = playData((*it).first, (*it).second, static_cast<float*>(_data), _nbChunk);
 		if (ret == true) {
 			it = m_playing.erase(it);
 		} else {

@@ -22,7 +22,7 @@ audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manag
 	channelMap.push_back(audio::channel_frontRight);
 	m_interface = m_manager->createOutput(48000,
 	                                      channelMap,
-	                                      audio::format_int16,
+	                                      audio::format_float,
 	                                      "speaker");
 	if (m_interface == nullptr) {
 		EWOLSA_ERROR("can not allocate output interface ... ");
@@ -60,8 +60,8 @@ void audio::ess::Music::onDataNeeded(void* _data,
                                      enum audio::format _format,
                                      uint32_t _sampleRate,
                                      const std::vector<audio::channel>& _map){
-	if (_format != audio::format_int16) {
-		EWOLSA_ERROR("call wrong type ... (need int16_t)");
+	if (_format != audio::format_float) {
+		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
 	if (m_current != m_next) {
@@ -78,8 +78,8 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	}
 	int32_t processTimeMax = std::min(int32_t(_nbChunk*_map.size()), int32_t(m_current->m_nbSamples - m_position));
 	processTimeMax = std::max(0, processTimeMax);
-	int16_t * pointer = static_cast<int16_t*>(_data);
-	int16_t * newData = &m_current->m_data[m_position];
+	float * pointer = static_cast<float*>(_data);
+	float * newData = &m_current->m_data[m_position];
 	EWOLSA_VERBOSE("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
 	for (int32_t iii=0; iii<processTimeMax; iii++) {
 		*pointer++ = *newData++;
