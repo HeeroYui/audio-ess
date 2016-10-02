@@ -5,13 +5,13 @@
  */
 
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 
-#include <audio/river/Interface.h>
-#include <audio/river/Manager.h>
-#include <audio/ess/ess.h>
-#include <audio/ess/debug.h>
-#include <ejson/ejson.h>
+#include <audio/river/Interface.hpp>
+#include <audio/river/Manager.hpp>
+#include <audio/ess/ess.hpp>
+#include <audio/ess/debug.hpp>
+#include <ejson/ejson.hpp>
 
 ememory::SharedPtr<audio::river::Manager> g_audioManager;
 ememory::SharedPtr<audio::ess::Effects> g_effects;

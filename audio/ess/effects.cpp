@@ -5,12 +5,12 @@
  */
 
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 
-#include <audio/ess/debug.h>
-#include <audio/ess/effects.h>
-#include <audio/ess/decWav.h>
-#include <math.h>
+#include <audio/ess/debug.hpp>
+#include <audio/ess/effects.hpp>
+#include <audio/ess/decWav.hpp>
+#include <cmath>
 
 audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _manager) :
   m_manager(_manager) {

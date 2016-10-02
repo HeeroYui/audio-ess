@@ -4,7 +4,7 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <audio/ess/debug.h>
+#include <audio/ess/debug.hpp>
 
 int32_t audio::ess::getLogId() {
 	static int32_t g_val = elog::registerInstance("audio-ess");

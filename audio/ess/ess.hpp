@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <audio/ess/effects.h>
-#include <audio/ess/music.h>
+#include <etk/types.hpp>
+#include <audio/ess/effects.hpp>
+#include <audio/ess/music.hpp>
 /**
  * @brief Audio library namespace
  */

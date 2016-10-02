@@ -5,11 +5,11 @@
  */
 #pragma once
 
-#include <etk/types.h>
-#include <etk/math/Vector3D.h>
-#include <audio/river/Interface.h>
-#include <audio/river/Manager.h>
-#include <audio/ess/LoadedFile.h>
+#include <etk/types.hpp>
+#include <etk/math/Vector3D.hpp>
+#include <audio/river/Interface.hpp>
+#include <audio/river/Manager.hpp>
+#include <audio/ess/LoadedFile.hpp>
 #include <mutex>
 
 namespace audio {

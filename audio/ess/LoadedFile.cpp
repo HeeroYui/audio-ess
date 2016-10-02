@@ -5,12 +5,12 @@
  */
 
 
-#include <etk/types.h>
-#include <ethread/tools.h>
-#include <audio/ess/debug.h>
-#include <audio/ess/LoadedFile.h>
-#include <audio/ess/decWav.h>
-#include <audio/ess/decOgg.h>
+#include <etk/types.hpp>
+#include <ethread/tools.hpp>
+#include <audio/ess/debug.hpp>
+#include <audio/ess/LoadedFile.hpp>
+#include <audio/ess/decWav.hpp>
+#include <audio/ess/decOgg.hpp>
 #include <unistd.h>
 
 #if defined(__TARGET_OS__Android)

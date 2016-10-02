@@ -5,12 +5,12 @@
  */
 
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 
-#include <audio/ess/music.h>
-#include <audio/ess/debug.h>
-#include <audio/ess/LoadedFile.h>
-#include <math.h>
+#include <audio/ess/music.hpp>
+#include <audio/ess/debug.hpp>
+#include <audio/ess/LoadedFile.hpp>
+#include <cmath>
 
 audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manager) :
   m_manager(_manager),

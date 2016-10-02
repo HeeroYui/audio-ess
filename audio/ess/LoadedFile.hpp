@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include <etk/types.h>
+#include <etk/types.hpp>
 #include <thread>
-#include <ememory/memory.h>
+#include <ememory/memory.hpp>
 
 namespace audio {
 	namespace ess {

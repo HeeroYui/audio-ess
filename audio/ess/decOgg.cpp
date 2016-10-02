@@ -4,12 +4,12 @@
  * @license APACHE v2.0 (see license file)
  */
 
-#include <etk/types.h>
-#include <etk/os/FSNode.h>
-#include <audio/ess/debug.h>
-#include <audio/ess/decOgg.h>
-#include <tremor/ivorbiscodec.h>
-#include <tremor/ivorbisfile.h>
+#include <etk/types.hpp>
+#include <etk/os/FSNode.hpp>
+#include <audio/ess/debug.hpp>
+#include <audio/ess/decOgg.hpp>
+#include <tremor/ivorbiscodec.hpp>
+#include <tremor/ivorbisfile.hpp>
 #include <memory>
 
 
