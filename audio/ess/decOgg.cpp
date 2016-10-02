@@ -8,8 +8,8 @@
 #include <etk/os/FSNode.hpp>
 #include <audio/ess/debug.hpp>
 #include <audio/ess/decOgg.hpp>
-#include <tremor/ivorbiscodec.hpp>
-#include <tremor/ivorbisfile.hpp>
+#include <tremor/ivorbiscodec.h>
+#include <tremor/ivorbisfile.h>
 #include <memory>
 
 

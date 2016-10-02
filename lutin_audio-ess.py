@@ -38,10 +38,10 @@ def create(target, module_name):
 		'audio/ess/LoadedFile.cpp'
 		])
 	my_module.add_header_file([
-		'audio/ess/effects.h',
-		'audio/ess/ess.h',
-		'audio/ess/music.h',
-		'audio/ess/LoadedFile.h'
+		'audio/ess/effects.hpp',
+		'audio/ess/ess.hpp',
+		'audio/ess/music.hpp',
+		'audio/ess/LoadedFile.hpp'
 		])
 	# name of the dependency
 	my_module.add_depend(['etk', 'audio-river', 'ogg', 'ejson'])

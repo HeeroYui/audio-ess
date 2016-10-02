@@ -41,7 +41,7 @@ what you need to do first:                          {#audio_ess_tuto_include}
 
 Include and basic init:
 ```{.cpp}
-#include <audio/ess/ess.h>
+#include <audio/ess/ess.hpp>
 
 //in the main application:
 int main(...) {
