@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import lutin.module as module
 import lutin.tools as tools
 import lutin.debug as debug
 
@@ -25,31 +24,30 @@ def get_maintainer():
 def get_version():
 	return "version.txt"
 
-def create(target, module_name):
-	my_module = module.Module(__file__, module_name, get_type())
+def configure(target, my_module):
 	# System core
 	my_module.add_src_file([
-		'audio/ess/debug.cpp',
-		'audio/ess/decWav.cpp',
-		'audio/ess/decOgg.cpp',
-		'audio/ess/effects.cpp',
-		'audio/ess/ess.cpp',
-		'audio/ess/music.cpp',
-		'audio/ess/LoadedFile.cpp'
-		])
+	    'audio/ess/debug.cpp',
+	    'audio/ess/decWav.cpp',
+	    'audio/ess/decOgg.cpp',
+	    'audio/ess/effects.cpp',
+	    'audio/ess/ess.cpp',
+	    'audio/ess/music.cpp',
+	    'audio/ess/LoadedFile.cpp'
+	    ])
 	my_module.add_header_file([
-		'audio/ess/effects.hpp',
-		'audio/ess/ess.hpp',
-		'audio/ess/music.hpp',
-		'audio/ess/LoadedFile.hpp'
-		])
+	    'audio/ess/effects.hpp',
+	    'audio/ess/ess.hpp',
+	    'audio/ess/music.hpp',
+	    'audio/ess/LoadedFile.hpp'
+	    ])
 	# name of the dependency
 	my_module.add_depend(['etk', 'audio-river', 'ogg', 'ejson'])
 	if "Android" in target.get_type():
 		# TODO : Change this ...
 		my_module.add_export_flag('c++', ["-pthread", "-frtti", "-fexceptions"])
 	
-	my_module.add_path(tools.get_current_path(__file__))
-	return my_module
+	my_module.add_path(".")
+	return True
 
 
