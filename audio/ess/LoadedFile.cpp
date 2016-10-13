@@ -11,7 +11,7 @@
 #include <audio/ess/LoadedFile.hpp>
 #include <audio/ess/decWav.hpp>
 #include <audio/ess/decOgg.hpp>
-#include <unistd.h>
+
 
 #if defined(__TARGET_OS__Android)
 	void* audio::ess::LoadedFile::threadCallback(void* _userData) {
