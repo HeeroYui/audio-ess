@@ -10,7 +10,7 @@ def get_desc():
 	return "ewol sound set interface for 'small game' audio effects"
 
 def get_licence():
-	return "APACHE-2"
+	return "MPL-2"
 
 def get_compagny_type():
 	return "com"
