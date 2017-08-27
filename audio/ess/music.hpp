@@ -10,7 +10,7 @@
 #include <audio/river/Manager.hpp>
 #include <audio/ess/LoadedFile.hpp>
 #include <mutex>
-#include <map>
+#include <etk/Map.hpp>
 
 
 namespace audio {
@@ -29,14 +29,14 @@ namespace audio {
 				                  const size_t& _nbChunk,
 				                  enum audio::format _format,
 				                  uint32_t _sampleRate,
-				                  const std::vector<audio::channel>& _map);
+				                  const etk::Vector<audio::channel>& _map);
 				ememory::SharedPtr<audio::ess::LoadedFile> m_current; //!< current music read
 				int32_t m_position; //!< current position of music read
-				std::map<std::string, ememory::SharedPtr<audio::ess::LoadedFile> > m_list; //!< list of all music loaded
+				etk::Map<etk::String, ememory::SharedPtr<audio::ess::LoadedFile> > m_list; //!< list of all music loaded
 				ememory::SharedPtr<audio::ess::LoadedFile> m_next; //!< next music to read
 			public:
-				void load(const std::string& _file, const std::string& _name);
-				void play(const std::string& _name);
+				void load(const etk::String& _file, const etk::String& _name);
+				void play(const etk::String& _name);
 				void stop();
 				void clear();
 		};

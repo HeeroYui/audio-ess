@@ -16,8 +16,8 @@ audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _m
   m_manager(_manager) {
 	std::unique_lock<std::mutex> lock(m_mutex);
 	//Set stereo output:
-	std::vector<audio::channel> channelMap;
-	channelMap.push_back(audio::channel_frontCenter);
+	etk::Vector<audio::channel> channelMap;
+	channelMap.pushBack(audio::channel_frontCenter);
 	m_interface = m_manager->createOutput(48000,
 	                                      channelMap,
 	                                      audio::format_float,
@@ -56,8 +56,8 @@ static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, in
 	     || _file->m_data.size() == 0) {
 		return true;
 	}
-	int32_t processTimeMax = std::min(_nbSample, _file->m_nbSamples - _position);
-	processTimeMax = std::max(0, processTimeMax);
+	int32_t processTimeMax = etk::min(_nbSample, _file->m_nbSamples - _position);
+	processTimeMax = etk::max(0, processTimeMax);
 	float * pointer = _bufferInterlace;
 	const float * newData = &_file->m_data[_position];
 	//EWOLSA_DEBUG("AUDIO : Play slot... nb sample : " << processTimeMax << " playTime=" <<m_playTime << " nbCannels=" << nbChannels);
@@ -80,7 +80,7 @@ void audio::ess::Effects::onDataNeeded(void* _data,
                                        const size_t& _nbChunk,
                                        enum audio::format _format,
                                        uint32_t _sampleRate,
-                                       const std::vector<audio::channel>& _map){
+                                       const etk::Vector<audio::channel>& _map){
 	if (_format != audio::format_float) {
 		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
@@ -96,7 +96,7 @@ void audio::ess::Effects::onDataNeeded(void* _data,
 	}
 }
 
-void audio::ess::Effects::load(const std::string& _file, const std::string& _name) {
+void audio::ess::Effects::load(const etk::String& _file, const etk::String& _name) {
 	// load the file:
 	ememory::SharedPtr<audio::ess::LoadedFile> tmp = ememory::makeShared<audio::ess::LoadedFile>(_file, 2);
 	if (tmp == nullptr) {
@@ -112,20 +112,20 @@ void audio::ess::Effects::load(const std::string& _file, const std::string& _nam
 		}
 	}
 	if (-1 <= id) {
-		m_list.push_back(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
+		m_list.pushBack(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
 	} else {
 		m_list[id].second = tmp;
 	}
 }
 
-int32_t audio::ess::Effects::getId(const std::string& _name) {
+int32_t audio::ess::Effects::getId(const etk::String& _name) {
 	std::unique_lock<std::mutex> lock(m_mutex);
 	for (size_t iii=0; iii<m_list.size(); ++iii) {
 		if (m_list[iii].first == _name) {
 			return iii;
 		}
 	}
-	m_list.push_back(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,nullptr));
+	m_list.pushBack(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,nullptr));
 	EWOLSA_WARNING("Can not find element name : '" << _name << "' added it ... (empty) ");
 	return m_list.size()-1;
 }
@@ -137,10 +137,10 @@ void audio::ess::Effects::play(int32_t _id, const vec3& _pos) {
 		EWOLSA_ERROR(" Can not play element audio with ID=" << _id << " out of [0.." << m_list.size() << "[");
 		return;
 	}
-	m_playing.push_back(std::pair<ememory::SharedPtr<audio::ess::LoadedFile>, int32_t>(m_list[_id].second, 0));
+	m_playing.pushBack(etk::Pair<ememory::SharedPtr<audio::ess::LoadedFile>, int32_t>(m_list[_id].second, 0));
 }
 
-void audio::ess::Effects::play(const std::string& _name, const vec3& _pos) {
+void audio::ess::Effects::play(const etk::String& _name, const vec3& _pos) {
 	play(getId(_name),_pos);
 }
 

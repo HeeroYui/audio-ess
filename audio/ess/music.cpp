@@ -17,9 +17,9 @@ audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manag
   m_position(0) {
 	std::unique_lock<std::mutex> lock(m_mutex);
 	//Set stereo output:
-	std::vector<audio::channel> channelMap;
-	channelMap.push_back(audio::channel_frontLeft);
-	channelMap.push_back(audio::channel_frontRight);
+	etk::Vector<audio::channel> channelMap;
+	channelMap.pushBack(audio::channel_frontLeft);
+	channelMap.pushBack(audio::channel_frontRight);
 	m_interface = m_manager->createOutput(48000,
 	                                      channelMap,
 	                                      audio::format_float,
@@ -59,7 +59,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
                                      const size_t& _nbChunk,
                                      enum audio::format _format,
                                      uint32_t _sampleRate,
-                                     const std::vector<audio::channel>& _map){
+                                     const etk::Vector<audio::channel>& _map){
 	if (_format != audio::format_float) {
 		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
@@ -76,8 +76,8 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	if (m_current->m_data.size() == 0) {
 		return;
 	}
-	int32_t processTimeMax = std::min(int32_t(_nbChunk*_map.size()), int32_t(m_current->m_nbSamples - m_position));
-	processTimeMax = std::max(0, processTimeMax);
+	int32_t processTimeMax = etk::min(int32_t(_nbChunk*_map.size()), int32_t(m_current->m_nbSamples - m_position));
+	processTimeMax = etk::max(0, processTimeMax);
 	float * pointer = static_cast<float*>(_data);
 	float * newData = &m_current->m_data[m_position];
 	EWOLSA_VERBOSE("AUDIO : Play slot... nb sample : " << processTimeMax << " map=" << _map << " _nbChunk=" << _nbChunk);
@@ -92,7 +92,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	}
 }
 
-void audio::ess::Music::load(const std::string& _file, const std::string& _name) {
+void audio::ess::Music::load(const etk::String& _file, const etk::String& _name) {
 	auto it = m_list.find(_name);
 	if (it != m_list.end()) {
 		return;
@@ -103,10 +103,10 @@ void audio::ess::Music::load(const std::string& _file, const std::string& _name)
 		return;
 	}
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_list.insert(std::pair<std::string,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
+	m_list.insert(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
 }
 
-void audio::ess::Music::play(const std::string& _name) {
+void audio::ess::Music::play(const etk::String& _name) {
 	auto it = m_list.find(_name);
 	if (it == m_list.end()) {
 		EWOLSA_ERROR("Can not Play music : " << _name);

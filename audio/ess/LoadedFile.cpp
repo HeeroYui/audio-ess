@@ -34,7 +34,7 @@ void audio::ess::LoadedFile::decode() {
 	EWOLSA_ERROR("End decode OGG : " << m_file << " size=" << m_nbSamples);
 }
 
-audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanRequested) :
+audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanRequested) :
   #if !defined(__TARGET_OS__Android)
   	m_thread(nullptr),
   #endif
@@ -42,7 +42,7 @@ audio::ess::LoadedFile::LoadedFile(const std::string& _fileName, int8_t _nbChanR
   m_nbSamples(0),
   m_nbChanRequested(_nbChanRequested),
   m_requestedTime(1) {
-	std::string tmpName = etk::tolower(m_file);
+	etk::String tmpName = etk::tolower(m_file);
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
 		m_data = audio::ess::wav::loadAudioFile(m_file, m_nbChanRequested);

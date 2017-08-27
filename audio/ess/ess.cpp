@@ -29,14 +29,14 @@ void audio::ess::unInit() {
 	g_audioManager.reset();
 }
 
-void audio::ess::soundSetParse(const std::string& _data) {
+void audio::ess::soundSetParse(const etk::String& _data) {
 	ejson::Document doc;
 	doc.parse(_data);
 	ejson::Object obj = doc["musics"].toObject();
 	if (    obj.exist() == true
 	     && g_music != nullptr) {
 		for (auto &it : obj.getKeys()) {
-			std::string file = obj[it].toString().get();
+			etk::String file = obj[it].toString().get();
 			EWOLSA_INFO("load Music : '" << it << "' file=" << file);
 			g_music->load(file, it);
 		}
@@ -45,18 +45,18 @@ void audio::ess::soundSetParse(const std::string& _data) {
 	if (    obj.exist() == true
 	     && g_effects != nullptr) {
 		for (auto &it : obj.getKeys()) {
-			std::string file = obj[it].toString().get();
+			etk::String file = obj[it].toString().get();
 			EWOLSA_INFO("load Effect : '" << it << "' file=" << file);
 			g_effects->load(file, it);
 		}
 	}
 }
 
-void audio::ess::soundSetLoad(const std::string& _file) {
+void audio::ess::soundSetLoad(const etk::String& _file) {
 	soundSetParse(etk::FSNodeReadAllData(_file));
 }
 
-void audio::ess::musicPlay(const std::string& _name) {
+void audio::ess::musicPlay(const etk::String& _name) {
 	if (g_music == nullptr) {
 		return;
 	}
@@ -98,7 +98,7 @@ bool audio::ess::musicGetMute() {
 	return g_audioManager->getMute("MUSIC");
 }
 
-int32_t audio::ess::effectGetId(const std::string& _name) {
+int32_t audio::ess::effectGetId(const etk::String& _name) {
 	if (g_effects == nullptr) {
 		return -1;
 	}
@@ -112,7 +112,7 @@ void audio::ess::effectPlay(int32_t _id, const vec3& _pos) {
 	g_effects->play(_id, _pos);
 }
 
-void audio::ess::effectPlay(const std::string& _name, const vec3& _pos) {
+void audio::ess::effectPlay(const etk::String& _name, const vec3& _pos) {
 	if (g_effects == nullptr) {
 		return;
 	}

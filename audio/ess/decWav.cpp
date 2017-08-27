@@ -57,8 +57,8 @@ typedef struct {
 #define COMPR_G721   (64)
 #define COMPR_MPEG   (80)
 
-std::vector<float> audio::ess::wav::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
-	std::vector<float> out;
+etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, int8_t _nbChan) {
+	etk::Vector<float> out;
 	waveHeader myHeader;
 	memset(&myHeader, 0, sizeof(waveHeader));
 	etk::FSNode fileAccess(_filename);

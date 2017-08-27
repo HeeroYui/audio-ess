@@ -46,8 +46,8 @@ static long localTellFunc(void *datasource) {
 	return file->fileTell();
 }
 
-std::vector<float> audio::ess::ogg::loadAudioFile(const std::string& _filename, int8_t _nbChan) {
-	std::vector<float> out;
+etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, int8_t _nbChan) {
+	etk::Vector<float> out;
 	OggVorbis_File vf;
 	int32_t eof=0;
 	int32_t current_section;

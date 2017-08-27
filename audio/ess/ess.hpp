@@ -29,18 +29,18 @@ namespace audio {
 		 * @brief Parse a JSON configuration data of a soundset
 		 * @param[in] _data JSON string data to parse
 		 */
-		void soundSetParse(const std::string& _data);
+		void soundSetParse(const etk::String& _data);
 		/**
 		 * @brief Parse a configuration file of a soundset
 		 * @param[in] _file JSON file to parse
 		 */
-		void soundSetLoad(const std::string& _file);
+		void soundSetLoad(const etk::String& _file);
 		
 		/**
 		 * @brief Play a music with his name
 		 * @param[in] _name Name of the music (not the Path)
 		 */
-		void musicPlay(const std::string& _name);
+		void musicPlay(const etk::String& _name);
 		/**
 		 * @brief Stop the music played
 		 */
@@ -72,7 +72,7 @@ namespace audio {
 		 * @param[in] _name Name of the effects
 		 * @return the effect ID or -1 if it does not exist...
 		 */
-		int32_t effectGetId(const std::string& _name);
+		int32_t effectGetId(const etk::String& _name);
 		/**
 		 * @brief Play an effect with his ID
 		 * @param[in] _id Id of the effect to play
@@ -84,7 +84,7 @@ namespace audio {
 		 * @param[in] _name Name of the effect to play
 		 * @param[in] _pos position of the efffect is played (not used / not implemented)
 		 */
-		void effectPlay(const std::string& _name, const vec3& _pos=vec3(0,0,0));
+		void effectPlay(const etk::String& _name, const vec3& _pos=vec3(0,0,0));
 		/**
 		 * @brief Set the effects volume
 		 * @param[in] _dB apply decibel volume at the effects [-100..100]

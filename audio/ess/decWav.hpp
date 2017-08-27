@@ -10,7 +10,7 @@
 namespace audio {
 	namespace ess {
 		namespace wav {
-			std::vector<float> loadAudioFile(const std::string& _filename, int8_t _nbChan);
+			etk::Vector<float> loadAudioFile(const etk::String& _filename, int8_t _nbChan);
 		}
 	}
 }

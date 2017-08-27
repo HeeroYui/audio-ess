@@ -25,15 +25,15 @@ namespace audio {
 					ememory::SharedPtr<std::thread> m_thread;
 				#endif
 			public:
-				LoadedFile(const std::string& _fileName, int8_t _nbChanRequested=1);
+				LoadedFile(const etk::String& _fileName, int8_t _nbChanRequested=1);
 				~LoadedFile();
-				std::string m_file;
+				etk::String m_file;
 				int32_t m_nbSamples;
 				int32_t m_nbChanRequested;
 				int32_t m_requestedTime;
-				std::vector<float> m_data;
+				etk::Vector<float> m_data;
 			public:
-				const std::string& getName() {
+				const etk::String& getName() {
 					return m_file;
 				};
 				void decode();
