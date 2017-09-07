@@ -15,7 +15,7 @@
 audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manager) :
   m_manager(_manager),
   m_position(0) {
-	std::unique_lock<std::mutex> lock(m_mutex);
+	std::unique_lock<ethread::Mutex> lock(m_mutex);
 	//Set stereo output:
 	etk::Vector<audio::channel> channelMap;
 	channelMap.pushBack(audio::channel_frontLeft);
@@ -63,7 +63,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	if (_format != audio::format_float) {
 		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
-	std::unique_lock<std::mutex> lock(m_mutex);
+	std::unique_lock<ethread::Mutex> lock(m_mutex);
 	if (m_current != m_next) {
 		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
 		m_current = m_next;
@@ -102,7 +102,7 @@ void audio::ess::Music::load(const etk::String& _file, const etk::String& _name)
 		EWOLSA_ERROR("can not load audio Music = " << _file);
 		return;
 	}
-	std::unique_lock<std::mutex> lock(m_mutex);
+	std::unique_lock<ethread::Mutex> lock(m_mutex);
 	m_list.insert(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
 }
 
@@ -114,7 +114,7 @@ void audio::ess::Music::play(const etk::String& _name) {
 	}
 	// in all case we stop the current playing music ...
 	stop();
-	std::unique_lock<std::mutex> lock(m_mutex);
+	std::unique_lock<ethread::Mutex> lock(m_mutex);
 	m_next = it->second;
 	EWOLSA_INFO("Playing track " << (m_current==nullptr?-1:m_current->getUId()) << " request next : " << m_next->getUId());
 }
@@ -123,7 +123,7 @@ void audio::ess::Music::stop() {
 	if (m_current == nullptr) {
 		EWOLSA_INFO("No current audio is playing");
 	}
-	std::unique_lock<std::mutex> lock(m_mutex);
+	std::unique_lock<ethread::Mutex> lock(m_mutex);
 	m_current.reset();
 }
 

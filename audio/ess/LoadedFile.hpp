@@ -6,7 +6,7 @@
 #pragma once
 
 #include <etk/types.hpp>
-#include <thread>
+#include <ethread/Thread.hpp>
 #include <ememory/memory.hpp>
 
 namespace audio {
@@ -22,7 +22,7 @@ namespace audio {
 				#if defined(__TARGET_OS__Android)
 					pthread_t m_thread;
 				#else
-					ememory::SharedPtr<std::thread> m_thread;
+					ememory::SharedPtr<ethread::Thread> m_thread;
 				#endif
 			public:
 				LoadedFile(const etk::String& _fileName, int8_t _nbChanRequested=1);

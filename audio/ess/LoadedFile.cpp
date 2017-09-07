@@ -53,7 +53,7 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 			#if defined(__TARGET_OS__Android)
 				pthread_create(&m_thread, nullptr, &audio::ess::LoadedFile::threadCallback, this);
 			#else
-				m_thread = ememory::makeShared<std::thread>(&audio::ess::LoadedFile::threadCall, this);
+				m_thread = ememory::makeShared<ethread::Thread>(&audio::ess::LoadedFile::threadCall, this);
 				if (m_thread == nullptr) {
 					EWOLSA_ERROR("Can not create thread ...");
 					return;

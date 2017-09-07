@@ -9,7 +9,7 @@
 #include <audio/river/Interface.hpp>
 #include <audio/river/Manager.hpp>
 #include <audio/ess/LoadedFile.hpp>
-#include <mutex>
+#include <ethread/Mutex.hpp>
 #include <etk/Map.hpp>
 
 
@@ -17,7 +17,7 @@ namespace audio {
 	namespace ess {
 		class Music {
 			private:
-				mutable std::mutex m_mutex;
+				mutable ethread::Mutex m_mutex;
 				ememory::SharedPtr<audio::river::Manager> m_manager;
 				ememory::SharedPtr<audio::river::Interface> m_interface;
 			public:
