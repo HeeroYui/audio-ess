@@ -59,7 +59,7 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 					return;
 				}
 			#endif
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			ethread::sleepMilliSeconds((1));
 		#else
 			decode();
 		#endif
