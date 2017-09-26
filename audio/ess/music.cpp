@@ -31,14 +31,14 @@ audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manag
 	m_interface->setName("audio::ess::music");
 	m_interface->addVolumeGroup("MUSIC");
 	// set callback mode ...
-	m_interface->setOutputCallback(std::bind(&audio::ess::Music::onDataNeeded,
-	                                         this,
-	                                         std::placeholders::_1,
-	                                         std::placeholders::_2,
-	                                         std::placeholders::_3,
-	                                         std::placeholders::_4,
-	                                         std::placeholders::_5,
-	                                         std::placeholders::_6));
+	m_interface->setOutputCallback([=] (void* _data,
+	                                    const audio::Time& _playTime,
+	                                    const size_t& _nbChunk,
+	                                    enum audio::format _format,
+	                                    uint32_t _sampleRate,
+	                                    const etk::Vector<audio::channel>& _map) {
+	                                	audio::ess::Music::onDataNeeded(_data, _playTime, _nbChunk, _format, _sampleRate, _map);
+	                                });
 	m_interface->start();
 }
 
@@ -63,6 +63,7 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	if (_format != audio::format_float) {
 		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
+	EWOLSA_VERBOSE("           get data Music: "<< _nbChunk);
 	ethread::UniqueLock lock(m_mutex);
 	if (m_current != m_next) {
 		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
@@ -103,7 +104,7 @@ void audio::ess::Music::load(const etk::String& _file, const etk::String& _name)
 		return;
 	}
 	ethread::UniqueLock lock(m_mutex);
-	m_list.insert(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,tmp));
+	m_list.add(_name, tmp);
 }
 
 void audio::ess::Music::play(const etk::String& _name) {

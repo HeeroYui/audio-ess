@@ -29,14 +29,14 @@ audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _m
 	m_interface->setName("audio::ess::Effects");
 	m_interface->addVolumeGroup("EFFECT");
 	// set callback mode ...
-	m_interface->setOutputCallback(std::bind(&audio::ess::Effects::onDataNeeded,
-	                                         this,
-	                                         std::placeholders::_1,
-	                                         std::placeholders::_2,
-	                                         std::placeholders::_3,
-	                                         std::placeholders::_4,
-	                                         std::placeholders::_5,
-	                                         std::placeholders::_6));
+	m_interface->setOutputCallback([=] (void* _data,
+	                                    const audio::Time& _playTime,
+	                                    const size_t& _nbChunk,
+	                                    enum audio::format _format,
+	                                    uint32_t _sampleRate,
+	                                    const etk::Vector<audio::channel>& _map) {
+	                                	audio::ess::Effects::onDataNeeded(_data, _playTime, _nbChunk, _format, _sampleRate, _map);
+	                                });
 	m_interface->start();
 }
 
@@ -84,6 +84,7 @@ void audio::ess::Effects::onDataNeeded(void* _data,
 	if (_format != audio::format_float) {
 		EWOLSA_ERROR("call wrong type ... (need float)");
 	}
+	EWOLSA_VERBOSE("           get data Effect: "<< _nbChunk);
 	ethread::UniqueLock lock(m_mutex);
 	auto it = m_playing.begin();
 	while (it != m_playing.end()) {

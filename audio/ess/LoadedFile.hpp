@@ -19,11 +19,7 @@ namespace audio {
 					return m_uid;
 				}
 			private:
-				#if defined(__TARGET_OS__Android)
-					pthread_t m_thread;
-				#else
-					ememory::SharedPtr<ethread::Thread> m_thread;
-				#endif
+				ememory::SharedPtr<ethread::Thread> m_thread;
 			public:
 				LoadedFile(const etk::String& _fileName, int8_t _nbChanRequested=1);
 				~LoadedFile();

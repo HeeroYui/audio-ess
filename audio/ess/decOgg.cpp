@@ -10,7 +10,7 @@
 #include <audio/ess/decOgg.hpp>
 #include <tremor/ivorbiscodec.h>
 #include <tremor/ivorbisfile.h>
-#include <memory>
+#include <ememory/UniquePtr.hpp>
 
 
 static size_t LocalReadFunc(void *ptr, size_t size, size_t nmemb, void *datasource) {
@@ -57,7 +57,7 @@ etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, 
 		localCloseFunc,
 		localTellFunc
 	};
-	std::unique_ptr<etk::FSNode> fileAccess = std::unique_ptr<etk::FSNode>(new etk::FSNode(_filename));
+	ememory::UniquePtr<etk::FSNode> fileAccess = ememory::UniquePtr<etk::FSNode>(new etk::FSNode(_filename));
 	// Start loading the XML : 
 	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
 	if (false == fileAccess->exist()) {

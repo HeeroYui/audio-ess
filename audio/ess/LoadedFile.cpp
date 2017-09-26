@@ -12,17 +12,6 @@
 #include <audio/ess/decWav.hpp>
 #include <audio/ess/decOgg.hpp>
 
-
-#if defined(__TARGET_OS__Android)
-	void* audio::ess::LoadedFile::threadCallback(void* _userData) {
-		audio::ess::LoadedFile* threadHandle = static_cast<audio::ess::LoadedFile*>(_userData);
-		if (threadHandle != nullptr) {
-			threadHandle->threadCall();
-		}
-		return nullptr;
-	}
-#endif
-
 void audio::ess::LoadedFile::threadCall() {
 	decode();
 }
@@ -35,9 +24,6 @@ void audio::ess::LoadedFile::decode() {
 }
 
 audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanRequested) :
-  #if !defined(__TARGET_OS__Android)
-  	m_thread(nullptr),
-  #endif
   m_file(_fileName),
   m_nbSamples(0),
   m_nbChanRequested(_nbChanRequested),
@@ -50,15 +36,11 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 	} else if (etk::end_with(tmpName, ".ogg") == true) {
 		#if 1
 			EWOLSA_INFO("create thread");
-			#if defined(__TARGET_OS__Android)
-				pthread_create(&m_thread, nullptr, &audio::ess::LoadedFile::threadCallback, this);
-			#else
-				m_thread = ememory::makeShared<ethread::Thread>(&audio::ess::LoadedFile::threadCall, this);
-				if (m_thread == nullptr) {
-					EWOLSA_ERROR("Can not create thread ...");
-					return;
-				}
-			#endif
+			m_thread = ememory::makeShared<ethread::Thread>([&](){decode();}, "audioDecoding");
+			if (m_thread == nullptr) {
+				EWOLSA_ERROR("Can not create thread ...");
+				return;
+			}
 			ethread::sleepMilliSeconds((1));
 		#else
 			decode();
@@ -70,15 +52,10 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 }
 
 audio::ess::LoadedFile::~LoadedFile() {
-	#if defined(__TARGET_OS__Android)
-		void* ret = nullptr;
-		int val = pthread_join(m_thread, &ret);
-	#else
-		if (m_thread != nullptr) {
-			m_thread->join();
-		}
-		m_thread.reset();
-	#endif
+	if (m_thread != nullptr) {
+		m_thread->join();
+	}
+	m_thread.reset();
 }
 
 
