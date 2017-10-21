@@ -57,7 +57,7 @@ etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, 
 		localCloseFunc,
 		localTellFunc
 	};
-	ememory::UniquePtr<etk::FSNode> fileAccess = ememory::UniquePtr<etk::FSNode>(new etk::FSNode(_filename));
+	ememory::UniquePtr<etk::FSNode> fileAccess = ememory::UniquePtr<etk::FSNode>(ETK_NEW(etk::FSNode, _filename));
 	// Start loading the XML : 
 	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
 	if (false == fileAccess->exist()) {
