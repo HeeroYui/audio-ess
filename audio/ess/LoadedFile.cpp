@@ -28,7 +28,7 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
   m_nbSamples(0),
   m_nbChanRequested(_nbChanRequested),
   m_requestedTime(1) {
-	etk::String tmpName = etk::tolower(m_file);
+	etk::String tmpName = etk::toLower(m_file);
 	// select the corect Loader :
 	if (etk::end_with(tmpName, ".wav") == true) {
 		m_data = audio::ess::wav::loadAudioFile(m_file, m_nbChanRequested);
