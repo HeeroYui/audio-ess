@@ -73,7 +73,7 @@ etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, 
 		EWOLSA_ERROR("Can not open the file : \"" << *fileAccess << "\"");
 		return out;
 	}
-	if (ov_open_callbacks(&(*fileAccess), &vf, nullptr, 0, tmpCallback) < 0) {
+	if (ov_open_callbacks(&(*fileAccess), &vf, null, 0, tmpCallback) < 0) {
 		EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
 		return out;
 	}

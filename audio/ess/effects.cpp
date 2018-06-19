@@ -22,7 +22,7 @@ audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _m
 	                                      channelMap,
 	                                      audio::format_float,
 	                                      "speaker");
-	if (m_interface == nullptr) {
+	if (m_interface == null) {
 		EWOLSA_ERROR("can not allocate output interface ... ");
 		return;
 	}
@@ -41,7 +41,7 @@ audio::ess::Effects::Effects(const ememory::SharedPtr<audio::river::Manager>& _m
 }
 
 audio::ess::Effects::~Effects() {
-	if (m_interface != nullptr) {
+	if (m_interface != null) {
 		m_interface->stop();
 	}
 	m_interface.reset();
@@ -52,7 +52,7 @@ audio::ess::Effects::~Effects() {
 
 
 static bool playData(const ememory::SharedPtr<audio::ess::LoadedFile>& _file, int32_t& _position, float* _bufferInterlace, int32_t _nbSample) {
-	if (    _file == nullptr
+	if (    _file == null
 	     || _file->m_data.size() == 0) {
 		return true;
 	}
@@ -100,7 +100,7 @@ void audio::ess::Effects::onDataNeeded(void* _data,
 void audio::ess::Effects::load(const etk::String& _file, const etk::String& _name) {
 	// load the file:
 	ememory::SharedPtr<audio::ess::LoadedFile> tmp = ememory::makeShared<audio::ess::LoadedFile>(_file, 2);
-	if (tmp == nullptr) {
+	if (tmp == null) {
 		EWOLSA_ERROR("can not load audio Effects = " << _file);
 		return;
 	}
@@ -126,7 +126,7 @@ int32_t audio::ess::Effects::getId(const etk::String& _name) {
 			return iii;
 		}
 	}
-	m_list.pushBack(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,nullptr));
+	m_list.pushBack(etk::Pair<etk::String,ememory::SharedPtr<audio::ess::LoadedFile>>(_name,null));
 	EWOLSA_WARNING("Can not find element name : '" << _name << "' added it ... (empty) ");
 	return m_list.size()-1;
 }

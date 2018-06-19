@@ -37,7 +37,7 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 		#if 1
 			EWOLSA_INFO("create thread");
 			m_thread = ememory::makeShared<ethread::Thread>([&](){decode();}, "audioDecoding");
-			if (m_thread == nullptr) {
+			if (m_thread == null) {
 				EWOLSA_ERROR("Can not create thread ...");
 				return;
 			}
@@ -52,7 +52,7 @@ audio::ess::LoadedFile::LoadedFile(const etk::String& _fileName, int8_t _nbChanR
 }
 
 audio::ess::LoadedFile::~LoadedFile() {
-	if (m_thread != nullptr) {
+	if (m_thread != null) {
 		m_thread->join();
 	}
 	m_thread.reset();

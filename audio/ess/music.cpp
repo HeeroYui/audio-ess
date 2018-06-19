@@ -24,7 +24,7 @@ audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manag
 	                                      channelMap,
 	                                      audio::format_float,
 	                                      "speaker");
-	if (m_interface == nullptr) {
+	if (m_interface == null) {
 		EWOLSA_ERROR("can not allocate output interface ... ");
 		return;
 	}
@@ -43,7 +43,7 @@ audio::ess::Music::Music(const ememory::SharedPtr<audio::river::Manager>& _manag
 }
 
 audio::ess::Music::~Music() {
-	if (m_interface != nullptr) {
+	if (m_interface != null) {
 		m_interface->stop();
 	}
 	m_interface.reset();
@@ -66,11 +66,11 @@ void audio::ess::Music::onDataNeeded(void* _data,
 	EWOLSA_VERBOSE("           get data Music: "<< _nbChunk);
 	ethread::UniqueLock lock(m_mutex);
 	if (m_current != m_next) {
-		EWOLSA_INFO("change track " << (m_current==nullptr?-1:m_current->getUId()) << " ==> " << (m_next==nullptr?-1:m_next->getUId()));
+		EWOLSA_INFO("change track " << (m_current==null?-1:m_current->getUId()) << " ==> " << (m_next==null?-1:m_next->getUId()));
 		m_current = m_next;
 		m_position = 0;
 	}
-	if (m_current == nullptr) {
+	if (m_current == null) {
 		// nothing to play ...
 		return;
 	}
@@ -99,7 +99,7 @@ void audio::ess::Music::load(const etk::String& _file, const etk::String& _name)
 		return;
 	}
 	ememory::SharedPtr<audio::ess::LoadedFile> tmp = ememory::makeShared<audio::ess::LoadedFile>(_file, 2);
-	if (tmp == nullptr) {
+	if (tmp == null) {
 		EWOLSA_ERROR("can not load audio Music = " << _file);
 		return;
 	}
@@ -117,11 +117,11 @@ void audio::ess::Music::play(const etk::String& _name) {
 	stop();
 	ethread::UniqueLock lock(m_mutex);
 	m_next = it->second;
-	EWOLSA_INFO("Playing track " << (m_current==nullptr?-1:m_current->getUId()) << " request next : " << m_next->getUId());
+	EWOLSA_INFO("Playing track " << (m_current==null?-1:m_current->getUId()) << " request next : " << m_next->getUId());
 }
 
 void audio::ess::Music::stop() {
-	if (m_current == nullptr) {
+	if (m_current == null) {
 		EWOLSA_INFO("No current audio is playing");
 	}
 	ethread::UniqueLock lock(m_mutex);
