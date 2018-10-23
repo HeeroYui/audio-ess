@@ -12,6 +12,7 @@
 #include <audio/ess/ess.hpp>
 #include <audio/ess/debug.hpp>
 #include <ejson/ejson.hpp>
+#include <etk/uri/uri.hpp>
 
 ememory::SharedPtr<audio::river::Manager> g_audioManager;
 ememory::SharedPtr<audio::ess::Effects> g_effects;
@@ -52,8 +53,10 @@ void audio::ess::soundSetParse(const etk::String& _data) {
 	}
 }
 
-void audio::ess::soundSetLoad(const etk::String& _file) {
-	soundSetParse(etk::FSNodeReadAllData(_file));
+void audio::ess::soundSetLoad(const etk::Uri& _uri) {
+	etk::String data;
+	etk::uri::readAll(_uri, data);
+	soundSetParse(data);
 }
 
 void audio::ess::musicPlay(const etk::String& _name) {

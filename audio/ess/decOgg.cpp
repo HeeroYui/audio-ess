@@ -5,7 +5,6 @@
  */
 
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
 #include <audio/ess/debug.hpp>
 #include <audio/ess/decOgg.hpp>
 #include <tremor/ivorbiscodec.h>
@@ -14,21 +13,21 @@
 
 
 static size_t LocalReadFunc(void *ptr, size_t size, size_t nmemb, void *datasource) {
-	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
-	return file->fileRead(ptr, size, nmemb);
+	etk::io::Interface* fileIO = static_cast<etk::io::Interface*>(datasource);
+	return fileIO->read(ptr, size, nmemb);
 }
 
 static int localSeekFunc(void *datasource, ogg_int64_t offset, int whence) {
-	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
-	enum etk::seekNode mode = etk::seekNode_start;
+	etk::io::Interface* fileIO = static_cast<etk::io::Interface*>(datasource);
+	etk::io::SeekMode mode = etk::io::SeekMode::Start;
 	if (whence == SEEK_SET) {
-		mode = etk::seekNode_start;
+		mode = etk::io::SeekMode::Start;
 	} else if (whence == SEEK_END) {
-		mode = etk::seekNode_end;
+		mode = etk::io::SeekMode::End;
 	} else if (whence == SEEK_CUR) {
-		mode = etk::seekNode_current;
+		mode = etk::io::SeekMode::Current;
 	}
-	if (file->fileSeek(offset, mode) == true) {
+	if (fileIO->seek(offset, mode) == true) {
 		return 0;
 	} else {
 		return -1;
@@ -36,17 +35,17 @@ static int localSeekFunc(void *datasource, ogg_int64_t offset, int whence) {
 }
 
 static int localCloseFunc(void *datasource) {
-	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
-	file->fileClose();
+	etk::io::Interface* fileIO = static_cast<etk::io::Interface*>(datasource);
+	fileIO->close();
 	return 0;
 }
 
 static long localTellFunc(void *datasource) {
-	etk::FSNode* file = static_cast<etk::FSNode*>(datasource);
-	return file->fileTell();
+	etk::io::Interface* fileIO = static_cast<etk::io::Interface*>(datasource);
+	return fileIO->tell();
 }
 
-etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, int8_t _nbChan) {
+etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::Uri& _uri, int8_t _nbChan) {
 	etk::Vector<float> out;
 	OggVorbis_File vf;
 	int32_t eof=0;
@@ -57,24 +56,28 @@ etk::Vector<float> audio::ess::ogg::loadAudioFile(const etk::String& _filename, 
 		localCloseFunc,
 		localTellFunc
 	};
-	ememory::UniquePtr<etk::FSNode> fileAccess = ememory::UniquePtr<etk::FSNode>(ETK_NEW(etk::FSNode, _filename));
 	// Start loading the XML : 
-	//EWOLSA_DEBUG("open file (OGG) \"" << fileAccess << "\"");
-	if (false == fileAccess->exist()) {
-		EWOLSA_ERROR("File Does not exist : \"" << *fileAccess << "\"");
+	EWOLSA_DEBUG("open file (OGG) " << _uri);
+	if (etk::uri::exist(_uri) == false) {
+		EWOLSA_ERROR("File Does not exist : " << _uri);
 		return out;
 	}
-	int32_t fileSize = fileAccess->fileSize();
-	if (0 == fileSize) {
-		EWOLSA_ERROR("This file is empty : \"" << *fileAccess << "\"");
+	int32_t fileSize = etk::uri::fileSize(_uri);
+	if (fileSize == 0) {
+		EWOLSA_ERROR("This file is empty : " << _uri);
 		return out;
 	}
-	if (false == fileAccess->fileOpenRead()) {
-		EWOLSA_ERROR("Can not open the file : \"" << *fileAccess << "\"");
+	ememory::SharedPtr<etk::io::Interface> fileIO = etk::uri::get(_uri);
+	if (fileIO == null) {
+		EWOLSA_ERROR("CAn not get file interface : " << _uri);
 		return out;
 	}
-	if (ov_open_callbacks(&(*fileAccess), &vf, null, 0, tmpCallback) < 0) {
-		EWOLSA_ERROR("Input does not appear to be an Ogg bitstream.");
+	if (fileIO->open(etk::io::OpenMode::Read) == false) {
+		EWOLSA_ERROR("Can not open the file : " << _uri);
+		return out;
+	}
+	if (ov_open_callbacks(fileIO.get(), &vf, null, 0, tmpCallback) < 0) {
+		EWOLSA_ERROR("Input does not appear to be an Ogg bitstream: " << _uri);
 		return out;
 	}
 	vorbis_info *vi=ov_info(&vf,-1);

@@ -24,14 +24,14 @@ A simple example:
 ```{.json}
 {
 	musics:{
-		"BG-1":"DATA:audio/Clean Soul.ogg"
-		"BG-22":"DATA:audio/Dark knight.ogg"
+		"BG-1":"DATA:///audio/Clean Soul.ogg"
+		"BG-22":"DATA:///audio/Dark knight.ogg"
 	},
 	effects:{
-		"end":"DATA:audio/end.wav",
-		"error":"DATA:audio/error.wav",
-		"levelup":"DATA:audio/levelup.wav",
-		"ok":"DATA:audio/ok.wav"
+		"end":"DATA:///audio/end.wav",
+		"error":"DATA:///audio/error.wav",
+		"levelup":"DATA:///audio/levelup.wav",
+		"ok":"DATA:///audio/ok.wav"
 	}
 }
 ```

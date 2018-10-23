@@ -5,7 +5,6 @@
  */
 
 #include <etk/types.hpp>
-#include <etk/os/FSNode.hpp>
 #include <audio/ess/debug.hpp>
 #include <audio/ess/decWav.hpp>
 
@@ -57,37 +56,40 @@ typedef struct {
 #define COMPR_G721   (64)
 #define COMPR_MPEG   (80)
 
-etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, int8_t _nbChan) {
+etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::Uri& _uri, int8_t _nbChan) {
 	etk::Vector<float> out;
 	waveHeader myHeader;
 	memset(&myHeader, 0, sizeof(waveHeader));
-	etk::FSNode fileAccess(_filename);
 	// Start loading the XML : 
-	EWOLSA_DEBUG("open file (WAV) \"" << fileAccess << "\"");
-
-	if (false == fileAccess.exist()) {
-		EWOLSA_ERROR("File Does not exist : \"" << fileAccess << "\"");
+	EWOLSA_DEBUG("open file (WAV) " << _uri);
+	if (etk::uri::exist(_uri) == false) {
+		EWOLSA_ERROR("File Does not exist : " << _uri);
 		return out;
 	}
-	int32_t fileSize = fileAccess.fileSize();
+	int32_t fileSize = etk::uri::fileSize(_uri);
 	if (0 == fileSize) {
-		EWOLSA_ERROR("This file is empty : \"" << fileAccess << "\"");
+		EWOLSA_ERROR("This file is empty : " << _uri);
 		return out;
 	}
-	if (false == fileAccess.fileOpenRead()) {
-		EWOLSA_ERROR("Can not open the file : \"" << fileAccess << "\"");
+	ememory::SharedPtr<etk::io::Interface> fileIO = etk::uri::get(_uri);
+	if (fileIO == null) {
+		EWOLSA_ERROR("CAn not get file interface : " << _uri);
+		return out;
+	}
+	if (fileIO->open(etk::io::OpenMode::Read) == false) {
+		EWOLSA_ERROR("Can not open the file : " << _uri);
 		return out;
 	}
 	// try to find endienness :
 	if (fileSize < (int64_t)sizeof(waveHeader)) {
-		EWOLSA_ERROR("File : \"" << fileAccess << "\"  == > has not enouth data inside might be minumum of " << (int32_t)(sizeof(waveHeader)));
+		EWOLSA_ERROR("File : " << _uri << "  == > has not enouth data inside might be minumum of " << (int32_t)(sizeof(waveHeader)));
 		return out;
 	}
 	// ----------------------------------------------
 	// read the header :
 	// ----------------------------------------------
-	if (fileAccess.fileRead(&myHeader.riffTag, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(&myHeader.riffTag, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	bool littleEndien = false;
@@ -99,55 +101,55 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 			littleEndien = true;
 		}
 	} else {
-		EWOLSA_ERROR("file: \"" << fileAccess << "\" Does not start with \"RIF\" " );
+		EWOLSA_ERROR("file: " << _uri << " Does not start with 'RIF' " );
 		return out;
 	}
 	// get the data size :
 	unsigned char tmpData[32];
-	if (fileAccess.fileRead(tmpData, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(tmpData, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	myHeader.size = CONVERT_UINT32(littleEndien, tmpData);
 	
 	// get the data size :
-	if (fileAccess.fileRead(&myHeader.waveTag, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(&myHeader.waveTag, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	if(    myHeader.waveTag[0] != 'W'
 	    || myHeader.waveTag[1] != 'A'
 	    || myHeader.waveTag[2] != 'V'
 	    || myHeader.waveTag[3] != 'E' ) {
-		EWOLSA_ERROR("file: \"" << fileAccess << "\" This is not a wave file " << myHeader.waveTag[0] << myHeader.waveTag[1] << myHeader.waveTag[2] << myHeader.waveTag[3] );
+		EWOLSA_ERROR("file: " << _uri << " This is not a wave file " << myHeader.waveTag[0] << myHeader.waveTag[1] << myHeader.waveTag[2] << myHeader.waveTag[3] );
 		return out;
 	}
 	
 	// get the data size :
-	if (fileAccess.fileRead(&myHeader.fmtTag, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(&myHeader.fmtTag, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	if(    myHeader.fmtTag[0] != 'f'
 	    || myHeader.fmtTag[1] != 'm'
 	    || myHeader.fmtTag[2] != 't'
 	    || myHeader.fmtTag[3] != ' ' ) {
-		EWOLSA_ERROR("file: \"" << fileAccess << "\" header error ..."  << myHeader.fmtTag[0] << myHeader.fmtTag[1] << myHeader.fmtTag[2] << myHeader.fmtTag[3]);
+		EWOLSA_ERROR("file: " << _uri << " header error ..."  << myHeader.fmtTag[0] << myHeader.fmtTag[1] << myHeader.fmtTag[2] << myHeader.fmtTag[3]);
 		return out;
 	}
 	// get the data size :
-	if (fileAccess.fileRead(tmpData, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(tmpData, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	myHeader.waveFormatSize = CONVERT_UINT32(littleEndien, tmpData);
 	
 	if (myHeader.waveFormatSize != 16) {
-		EWOLSA_ERROR("file : \"" << fileAccess << "\"   == > header error ...");
+		EWOLSA_ERROR("file : " << _uri << "   == > header error ...");
 		return out;
 	}
-	if (fileAccess.fileRead(tmpData, 1, 16)!=16) {
-		EWOLSA_ERROR("Can not 16 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(tmpData, 1, 16)!=16) {
+		EWOLSA_ERROR("Can not 16 element in the file : " << _uri);
 		return out;
 	}
 	unsigned char * tmppp = tmpData;
@@ -170,20 +172,20 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 	EWOLSA_DEBUG("    bytesPerFrame : " << myHeader.waveFormat.bytesPerFrame);
 	EWOLSA_DEBUG("    bitsPerSample : " << myHeader.waveFormat.bitsPerSample);
 	// get the data size :
-	if (fileAccess.fileRead(&myHeader.dataTag, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(&myHeader.dataTag, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	if(    myHeader.dataTag[0] != 'd'
 	    || myHeader.dataTag[1] != 'a'
 	    || myHeader.dataTag[2] != 't'
 	    || myHeader.dataTag[3] != 'a' ) {
-		EWOLSA_ERROR("file: \"" << fileAccess << "\" header error ..."  << myHeader.dataTag[0] << myHeader.dataTag[1] << myHeader.dataTag[2] << myHeader.dataTag[3]);
+		EWOLSA_ERROR("file: " << _uri << " header error ..."  << myHeader.dataTag[0] << myHeader.dataTag[1] << myHeader.dataTag[2] << myHeader.dataTag[3]);
 		return out;
 	}
 	// get the data size :
-	if (fileAccess.fileRead(tmpData, 1, 4)!=4) {
-		EWOLSA_ERROR("Can not 4 element in the file : \"" << fileAccess << "\"");
+	if (fileIO->read(tmpData, 1, 4)!=4) {
+		EWOLSA_ERROR("Can not 4 element in the file : " << _uri);
 		return out;
 	}
 	myHeader.dataSize = CONVERT_UINT32(littleEndien, tmpData);
@@ -194,22 +196,22 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 	
 	//Parse the data and transform it if needed ...
 	if (COMPR_PCM != myHeader.waveFormat.type) {
-		EWOLSA_ERROR("File : \"" << fileAccess << "\"  == > support only PCM compression ...");
+		EWOLSA_ERROR("File : " << _uri << "  == > support only PCM compression ...");
 		return out;
 	}
 	if (myHeader.waveFormat.channelCount == 0 || myHeader.waveFormat.channelCount>2) {
-		EWOLSA_ERROR("File : \"" << fileAccess << "\"  == > support only mono or stereo ..." << myHeader.waveFormat.channelCount);
+		EWOLSA_ERROR("File : " << _uri << "  == > support only mono or stereo ..." << myHeader.waveFormat.channelCount);
 		return out;
 	}
 	if ( ! (    myHeader.waveFormat.bitsPerSample == 16
 	         || myHeader.waveFormat.bitsPerSample == 24
 	         || myHeader.waveFormat.bitsPerSample == 32 ) ) {
-		EWOLSA_ERROR("File : \"" << fileAccess << "\"  == > not supported bit/sample ..." << myHeader.waveFormat.bitsPerSample);
+		EWOLSA_ERROR("File : " << _uri << "  == > not supported bit/sample ..." << myHeader.waveFormat.bitsPerSample);
 		return out;
 	}
 	if( ! (   44100 == myHeader.waveFormat.samplesPerSec
 	       || 48000 == myHeader.waveFormat.samplesPerSec) ) {
-		EWOLSA_ERROR("File : \"" << fileAccess << "\"  == > not supported frequency " << myHeader.waveFormat.samplesPerSec << " != 48000");
+		EWOLSA_ERROR("File : " << _uri << "  == > not supported frequency " << myHeader.waveFormat.samplesPerSec << " != 48000");
 		return out;
 	}
 	EWOLSA_DEBUG("    dataSize : " << myHeader.dataSize);
@@ -224,14 +226,14 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 		char audioSample[8];
 		if (myHeader.waveFormat.bitsPerSample == 16) {
 			if (myHeader.waveFormat.channelCount == 1) {
-				if (fileAccess.fileRead(audioSample, 1, 2)!=2) {
+				if (fileIO->read(audioSample, 1, 2)!=2) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
 				left = ((int32_t)((int16_t)CONVERT_INT16(littleEndien, audioSample))) << 16;
 				right = left;
 			} else {
-				if (fileAccess.fileRead(audioSample, 1, 4)!=4) {
+				if (fileIO->read(audioSample, 1, 4)!=4) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
@@ -240,14 +242,14 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 			}
 		} else if (myHeader.waveFormat.bitsPerSample == 24) {
 			if (myHeader.waveFormat.channelCount == 1) {
-				if (fileAccess.fileRead(audioSample, 1, 3)!=3) {
+				if (fileIO->read(audioSample, 1, 3)!=3) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
 				left = CONVERT_INT24(littleEndien, audioSample);
 				right = left;
 			} else {
-				if (fileAccess.fileRead(audioSample, 1, 6)!=6) {
+				if (fileIO->read(audioSample, 1, 6)!=6) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
@@ -256,14 +258,14 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 			}
 		} else if (myHeader.waveFormat.bitsPerSample == 32) {
 			if (myHeader.waveFormat.channelCount == 1) {
-				if (fileAccess.fileRead(audioSample, 1, 4)!=4) {
+				if (fileIO->read(audioSample, 1, 4)!=4) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
 				left = CONVERT_INT32(littleEndien, audioSample);
 				right = left;
 			} else {
-				if (fileAccess.fileRead(audioSample, 1, 8)!=8) {
+				if (fileIO->read(audioSample, 1, 8)!=8) {
 					EWOLSA_ERROR("Read Error at position : " << iii);
 					return out;
 				}
@@ -280,7 +282,7 @@ etk::Vector<float> audio::ess::wav::loadAudioFile(const etk::String& _filename, 
 		}
 	}
 	// close the file:
-	fileAccess.fileClose();
+	fileIO->close();
 	return out;
 }
 

@@ -32,9 +32,9 @@ namespace audio {
 		void soundSetParse(const etk::String& _data);
 		/**
 		 * @brief Parse a configuration file of a soundset
-		 * @param[in] _file JSON file to parse
+		 * @param[in] _uri JSON file to parse
 		 */
-		void soundSetLoad(const etk::String& _file);
+		void soundSetLoad(const etk::Uri& _uri);
 		
 		/**
 		 * @brief Play a music with his name

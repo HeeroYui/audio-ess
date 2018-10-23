@@ -6,11 +6,12 @@
 #pragma once
 
 #include <etk/types.hpp>
+#include <etk/uri/uri.hpp>
 
 namespace audio {
 	namespace ess {
 		namespace ogg {
-			etk::Vector<float> loadAudioFile(const etk::String& _filename, int8_t _nbChan);
+			etk::Vector<float> loadAudioFile(const etk::Uri& _uri, int8_t _nbChan);
 			
 		}
 	}
